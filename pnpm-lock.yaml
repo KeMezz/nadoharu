@@ -50,6 +50,9 @@ importers:
       dotenv:
         specifier: ^17.2.4
         version: 17.2.4
+      passport:
+        specifier: ^0.7.0
+        version: 0.7.0
       passport-jwt:
         specifier: ^4.0.1
         version: 4.0.1
