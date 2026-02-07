@@ -7,9 +7,9 @@
 ## What Changes
 
 - **회원가입 기능**: GraphQL Mutation으로 새 사용자 등록 (`createUser`)
-- **로그인 기능**: GraphQL Query로 인증 후 JWT 토큰 발급 (`login`)
+- **로그인 기능**: GraphQL Mutation으로 인증 후 JWT 토큰 발급 (`login`)
 - **JWT 토큰 관리**: 액세스 토큰 발급, 검증, 갱신
-- **세션 쿠키**: 클라이언트에서 JWT를 쿠키로 관리 (Iron Session 패턴)
+- **세션 쿠키**: httpOnly cookie로 JWT 관리 (XSS 방지)
 - **비밀번호 보안**: bcrypt 해싱, 정책 검증 (10자 이상, 소문자+숫자+특수문자)
 - **인증 가드**: GraphQL Resolver에서 인증 필요 작업 보호
 - **Prisma 스키마**: User 모델 정의

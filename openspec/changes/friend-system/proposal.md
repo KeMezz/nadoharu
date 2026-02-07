@@ -43,7 +43,7 @@
 
 **데이터베이스**:
 - PostgreSQL `Friendship` 테이블 생성
-- 유니크 제약: `(requesterId, addresseeId)` (중복 요청 방지)
+- 유니크 제약: `(requesterId, addresseeId)` + 애플리케이션 레벨 양방향 중복 체크 (중복 요청 방지)
 - 인덱스: `requesterId`, `addresseeId`, `status`
 
 **테스트**:

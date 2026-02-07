@@ -10,7 +10,7 @@
 - **GitHub OAuth**: GitHub OAuth Apps
 - **JWT 토큰 발급**: 소셜 로그인 성공 시 자체 JWT 발급
 - **계정 연동**: 소셜 계정과 내부 User 모델 매핑
-- **Prisma 스키마**: OAuth 계정 정보 저장 (provider, providerId, accessToken 등)
+- **Prisma 스키마**: OAuth 계정 정보 저장 (provider, providerId, refreshToken 암호화 저장)
 
 **선행 요구사항**:
 - `authentication-system` 완료 (JWT 토큰 관리 인프라 필요)

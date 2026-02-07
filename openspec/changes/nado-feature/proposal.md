@@ -28,6 +28,9 @@
 ### Modified Capabilities
 
 - `post-timeline`: 나도한 게시물(리포스트)도 타임라인에 포함
+  - 원본 게시물과 나도한 게시물은 `createdAt` 기준으로 통합 정렬
+  - 동일 게시물이 여러 친구에 의해 나도된 경우, 가장 최근 나도 시간 기준으로 1개만 표시
+  - 리포스트 출처 표시: Post 객체에 `repostedBy` 필드 추가 (나도한 사용자 정보)
 
 ## Impact
 

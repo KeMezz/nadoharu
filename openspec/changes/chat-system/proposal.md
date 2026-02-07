@@ -49,6 +49,7 @@
 - PostgreSQL `ChatRoom`, `Message` 테이블 생성
 - 인덱스: `chatRoomId`, `createdAt` (메시지 조회 성능)
 - 유니크 제약: ChatRoom에서 두 사용자 조합 (participant1Id < participant2Id 정렬)
+  - 애플리케이션 로직에서 정렬 보장 필수: `const [smaller, larger] = [userId1, userId2].sort()`
 
 **인프라**:
 - WebSocket 엔드포인트 설정 (NestJS GraphQL Subscription)
