@@ -276,7 +276,7 @@ jobs:
             - [ ] **No hardcoded credentials** - API keys, passwords, tokens, secrets in source code
               ```bash
               # Search for hardcoded secrets
-              gh pr diff ${{ github.event.pull_request.number }} | grep -iE '(api[_-]?key|password|secret|token).*(=|:).*("|'"'"')'
+              gh pr diff ${{ github.event.pull_request.number }} | grep -iE '(api[_-]?key|password|secret|token).*(=|:)'
               ```
 
             - [ ] **No SQL injection** - String concatenation in database queries
@@ -493,6 +493,11 @@ jobs:
             2. Find the line number in PR diff (use `position` field, not `line` field)
             3. Only comment on lines that were changed or are in diff context
             4. Verify line is reviewable using: `gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files`
+
+            **Position Calculation Strategy:**
+            - GitHub API의 `position`은 diff patch 내에서의 상대적 위치입니다
+            - `gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files`로 각 파일의 patch를 가져와 position 매핑
+            - **Fallback:** position 계산이 복잡한 경우, 파일 레벨 코멘트만 사용 (line/position 필드 없이 path만 지정)
 
             ---
 
@@ -720,11 +725,11 @@ jobs:
             **Check for violations:**
 
             ```bash
-            # Domain should have ZERO external imports
-            grep -r "from.*application\|from.*infrastructure" apps/api/src/*/domain/ 2>/dev/null && echo "❌ Domain violation found" || echo "✅ Domain is clean"
+            # Domain should have ZERO external imports (더 엄격한 패턴)
+            grep -rE "from ['\"](.*/)?(application|infrastructure)" apps/api/src/*/domain/ 2>/dev/null && echo "❌ Domain violation found" || echo "✅ Domain is clean"
 
             # Application should NOT import Infrastructure
-            grep -r "from.*infrastructure" apps/api/src/*/application/ 2>/dev/null && echo "❌ Application violation found" || echo "✅ Application is clean"
+            grep -rE "from ['\"](.*/)?(infrastructure)" apps/api/src/*/application/ 2>/dev/null && echo "❌ Application violation found" || echo "✅ Application is clean"
 
             # Check for cross-context Repository imports (forbidden)
             grep -r "from.*bounded-contexts/.*/infrastructure.*Repository" apps/api/src/bounded-contexts/ 2>/dev/null && echo "❌ Cross-context Repository import found" || echo "✅ No violations"
