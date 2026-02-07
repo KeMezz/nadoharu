@@ -21,6 +21,7 @@ NestJS 백엔드는 `/nestjs-ddd` 스킬에 정의된 DDD/Clean Architecture 구
 - 인증(Passport/JWT) 설정 (다음 change에서)
 - CI/CD 파이프라인 구성
 - 프로덕션 Docker 이미지 빌드 설정
+- Mock Factory(`fishery`) 설정 (테스트 인프라 구축 change에서)
 
 ## Decisions
 
@@ -31,7 +32,7 @@ nadoharu/
 ├── pnpm-workspace.yaml
 ├── package.json                # 루트 (scripts, devDependencies)
 ├── tsconfig.base.json          # 공유 TS 설정
-├── .eslintrc.js                # 공유 ESLint
+├── eslint.config.mjs           # 공유 ESLint (flat config)
 ├── .prettierrc                 # 공유 Prettier
 ├── .gitignore
 ├── docker-compose.yml
@@ -90,7 +91,7 @@ nadoharu/
 - `common/`: 기술적 횡단 관심사 (middleware, guard, filter, logger)
 - `auth/`: 인증/인가 관련 (빈 구조만)
 
-**주의**: 스캐폴딩 시 반드시 `/nestjs-ddd` 스킬을 호출하여 구조와 컨벤션을 준수할 것.
+**주의**: 스캐폴딩 시 반드시 `/nestjs-ddd` 스킬을 호출하여 구조와 컨벤션을 준수할 것. 위 디렉토리 트리는 개요 수준의 참고용이며, `/nestjs-ddd` 스킬의 디렉토리 구조를 원본으로 한다.
 
 ### 3. TypeScript 설정 전략
 
@@ -116,7 +117,13 @@ services:
     volumes: postgres-data (named volume)
 ```
 
-### 5. 패키지 간 의존성
+### 5. ESLint 설정 형식
+
+ESLint 9.x의 flat config(`eslint.config.mjs`)를 사용한다. legacy config(`.eslintrc.*`)는 사용하지 않는다.
+
+최신 안정 버전 사용 원칙에 따라 flat config를 채택하며, NestJS와 Next.js 각각의 린트 규칙은 루트 flat config에서 파일 패턴별로 분기한다.
+
+### 6. 패키지 간 의존성
 
 ```
 apps/api  ──depends──▶  packages/shared

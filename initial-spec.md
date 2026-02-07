@@ -100,6 +100,8 @@
 | **프론트엔드 테스트** | Vitest (Unit) + Playwright (E2E) |
 | **배포** | Docker |
 
+> *모든 의존성은 작업 시점의 최신 안정(stable) 버전을 사용한다. 특정 버전 고정이 필요한 경우 해당 change의 design.md에 근거와 함께 기록한다.*
+
 ---
 
 ## 프로젝트 구조 (모노레포)
@@ -124,9 +126,9 @@ nadoharu/
 - 17개 기존 GraphQL 작업 지원
 
 ### 데이터 모델
-- User: `_id`, `name`, `email`, `account_id`, `about_me`, `profile_image_url`
-- Post: `_id`, `content`, `tags`, `category`, `imageUrls`, `author`, 나도 관련 필드
-- Comment: `_id`, `content`, `postId`, `commenter`, `createdAt`
+- User: `id`, `name`, `email`, `account_id`, `about_me`, `profile_image_url`
+- Post: `id`, `content`, `tags`, `category`, `imageUrls`, `author`, 나도 관련 필드
+- Comment: `id`, `content`, `postId`, `commenter`, `createdAt`
 - Friend: 양방향 관계, 신청/수락/거절 상태
 - Chat: 채팅방, 메시지
 - Notification: 활동 기반 알림

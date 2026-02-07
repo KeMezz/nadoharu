@@ -5,7 +5,7 @@
 - [ ] 1.3 `pnpm-workspace.yaml` 생성 (`apps/*`, `packages/*` 등록)
 - [ ] 1.4 루트 `tsconfig.base.json` 생성 (strict: true, 공통 컴파일러 옵션)
 - [ ] 1.5 루트 `.prettierrc` 생성
-- [ ] 1.6 루트 ESLint 설정 생성
+- [ ] 1.6 루트 ESLint flat config 설정 생성 (`eslint.config.mjs`)
 
 ## 2. packages/shared 공유 패키지
 

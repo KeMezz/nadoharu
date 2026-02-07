@@ -103,7 +103,7 @@ src/
 │   ├── domain/          # Entity, VO, Domain Service (외부 의존 없음)
 │   ├── application/     # UseCase, Repository 인터페이스 (Domain만 의존)
 │   └── infrastructure/  # Prisma Repository, Controller, Resolver, Module
-├── shared-kernel/       # 공유 도메인 (errors, value-objects, transaction)
+├── shared-kernel/       # 공유 도메인 커널 (domain/application/infrastructure)
 ├── common/              # 횡단 관심사 (middleware, guard, filter, logger)
 └── auth/                # 인증/인가 (guards, decorators, policies)
 ```
