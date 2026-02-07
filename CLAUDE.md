@@ -11,7 +11,7 @@ Always respond in Korean.
 ## 기술 스택
 
 - **apps/api**: NestJS 11, GraphQL Code-first, Prisma, PostgreSQL 17, Jest
-- **apps/web**: Next.js 15 (App Router), React 19, Vitest, Playwright
+- **apps/web**: Next.js 16 (App Router), React 19, Vitest, Playwright
 - **packages/shared**: 공유 타입/유틸리티
 - **인프라**: Docker Compose (PostgreSQL 17 Alpine), Cloudflare R2 (S3 호환)
 - **개발 도구**: pnpm workspace, TypeScript 5.7 (strict mode), ESLint 9, Prettier
