@@ -17,18 +17,18 @@
 
 ## 3. Domain Layer - Value Objects
 
-- [ ] 3.1 AccountId VO 구현 (정규식 검증: ^[a-z0-9_]{3,20}$)
-- [ ] 3.2 AccountId VO 단위 테스트 (유효/무효 케이스, 경계값)
-- [ ] 3.3 Password VO 구현 (정책 검증: 10-72자, 소문자+숫자+특수문자)
-- [ ] 3.4 Password VO 단위 테스트 (검증 순서, 다중 위반 시 첫 번째 에러)
-- [ ] 3.5 Email VO 구현 (class-validator @IsEmail, 소문자 정규화)
-- [ ] 3.6 Email VO 단위 테스트 (유효/무효 형식, 정규화)
+- [x] 3.1 AccountId VO 구현 (정규식 검증: ^[a-z0-9_]{3,20}$)
+- [x] 3.2 AccountId VO 단위 테스트 (유효/무효 케이스, 경계값)
+- [x] 3.3 Password VO 구현 (정책 검증: 10-72자, 소문자+숫자+특수문자)
+- [x] 3.4 Password VO 단위 테스트 (검증 순서, 다중 위반 시 첫 번째 에러)
+- [x] 3.5 Email VO 구현 (class-validator @IsEmail, 소문자 정규화)
+- [x] 3.6 Email VO 단위 테스트 (유효/무효 형식, 정규화)
 
 ## 4. Domain Layer - Entities
 
-- [ ] 4.1 User 엔티티 구현 (id, accountId, email, name, passwordHash)
-- [ ] 4.2 User 엔티티 단위 테스트 (생성, VO 검증)
-- [ ] 4.3 User 엔티티 팩토리 메서드 (create, reconstitute)
+- [x] 4.1 User 엔티티 구현 (id, accountId, email, name, passwordHash)
+- [x] 4.2 User 엔티티 단위 테스트 (생성, VO 검증)
+- [x] 4.3 User 엔티티 팩토리 메서드 (create, reconstitute)
 
 ## 5. Domain Layer - Services
 

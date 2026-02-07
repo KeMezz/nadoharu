@@ -228,7 +228,7 @@ apps/api/src/bounded-contexts/auth/
 
 ```prisma
 model User {
-  id           String   @id @default(cuid())
+  id           String   @id @default(uuid())
   accountId    String   @unique
   email        String   @unique
   name         String
