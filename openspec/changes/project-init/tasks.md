@@ -15,15 +15,15 @@
 
 ## 3. apps/api NestJS 프로젝트 (`/nestjs-ddd` 스킬 사용)
 
-- [ ] 3.1 `apps/api/package.json` 생성 (NestJS 의존성, `@nadoharu/shared` workspace 참조)
-- [ ] 3.2 `apps/api/tsconfig.json` 생성 (루트 extends, experimentalDecorators, emitDecoratorMetadata)
-- [ ] 3.3 `apps/api/nest-cli.json` 생성
-- [ ] 3.4 `apps/api/src/main.ts` 생성 (NestJS 부트스트랩)
-- [ ] 3.5 `apps/api/src/app.module.ts` 생성 (루트 모듈)
-- [ ] 3.6 `/nestjs-ddd` 스킬 기반 DDD 디렉토리 구조 생성: `bounded-contexts/`, `shared-kernel/` (domain/value-objects, domain/constants, domain/errors, application/transaction, application/errors, infrastructure/gateways/prisma), `common/` (middleware, guard, filter, logger, graphql), `auth/` (guards, decorators, policies)
-- [ ] 3.7 Jest 테스트 환경 설정 (`jest.config.ts`, `tsconfig.spec.json`)
-- [ ] 3.8 샘플 테스트 파일 작성 및 `pnpm test` 실행 확인
-- [ ] 3.9 NestJS 개발 서버 실행 확인 (`pnpm dev`)
+- [x] 3.1 `apps/api/package.json` 생성 (NestJS 의존성, `@nadoharu/shared` workspace 참조)
+- [x] 3.2 `apps/api/tsconfig.json` 생성 (루트 extends, experimentalDecorators, emitDecoratorMetadata)
+- [x] 3.3 `apps/api/nest-cli.json` 생성
+- [x] 3.4 `apps/api/src/main.ts` 생성 (NestJS 부트스트랩)
+- [x] 3.5 `apps/api/src/app.module.ts` 생성 (루트 모듈)
+- [x] 3.6 `/nestjs-ddd` 스킬 기반 DDD 디렉토리 구조 생성: `bounded-contexts/`, `shared-kernel/` (domain/value-objects, domain/constants, domain/errors, application/transaction, application/errors, infrastructure/gateways/prisma), `common/` (middleware, guard, filter, logger, graphql), `auth/` (guards, decorators, policies)
+- [x] 3.7 Jest 테스트 환경 설정 (`jest.config.ts`, `tsconfig.spec.json`)
+- [x] 3.8 샘플 테스트 파일 작성 및 `pnpm test` 실행 확인
+- [x] 3.9 NestJS 개발 서버 실행 확인 (`pnpm dev`)
 
 ## 4. apps/web Next.js 프로젝트
 
