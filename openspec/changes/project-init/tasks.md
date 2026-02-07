@@ -27,14 +27,14 @@
 
 ## 4. apps/web Next.js 프로젝트
 
-- [ ] 4.1 `apps/web/package.json` 생성 (Next.js 의존성, `@nadoharu/shared` workspace 참조)
-- [ ] 4.2 `apps/web/tsconfig.json` 생성 (루트 extends, jsx, Next.js 플러그인, module/moduleResolution을 bundler로 오버라이드)
-- [ ] 4.3 `apps/web/next.config.ts` 생성
-- [ ] 4.4 `apps/web/app/layout.tsx` 및 `apps/web/app/page.tsx` 생성
-- [ ] 4.5 Vitest 테스트 환경 설정 (`vitest.config.ts`)
-- [ ] 4.6 Playwright E2E 테스트 환경 설정 (`playwright.config.ts`)
-- [ ] 4.7 샘플 테스트 파일 작성 및 `pnpm test`, `pnpm test:e2e` 실행 확인
-- [ ] 4.8 Next.js 개발 서버 실행 확인 (`pnpm dev`)
+- [x] 4.1 `apps/web/package.json` 생성 (Next.js 의존성, `@nadoharu/shared` workspace 참조)
+- [x] 4.2 `apps/web/tsconfig.json` 생성 (루트 extends, jsx, Next.js 플러그인, module/moduleResolution을 bundler로 오버라이드)
+- [x] 4.3 `apps/web/next.config.ts` 생성
+- [x] 4.4 `apps/web/app/layout.tsx` 및 `apps/web/app/page.tsx` 생성
+- [x] 4.5 Vitest 테스트 환경 설정 (`vitest.config.ts`)
+- [x] 4.6 Playwright E2E 테스트 환경 설정 (`playwright.config.ts`)
+- [x] 4.7 샘플 테스트 파일 작성 및 `pnpm test`, `pnpm test:e2e` 실행 확인
+- [x] 4.8 Next.js 개발 서버 실행 확인 (`pnpm dev`)
 
 ## 5. Docker 및 개발 환경
 
