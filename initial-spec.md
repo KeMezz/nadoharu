@@ -33,7 +33,7 @@
 ### 게시물 (Posts)
 - 타임라인 피드 (커서 기반 무한 스크롤)
 - 게시물 작성/수정/삭제
-- 이미지 업로드 (클라이언트 압축, S3 저장)
+- 이미지 업로드 (클라이언트 압축, S3 호환 스토리지 저장)
 - Pull-to-Refresh
 
 ### 나도 (Nado)
@@ -134,7 +134,7 @@ nadoharu/
 - Notification: 활동 기반 알림
 
 ### 인프라
-- 이미지 저장: AWS S3 (ap-northeast-2)
+- 이미지 저장: S3 호환 오브젝트 스토리지 (로컬: MinIO, 프로덕션: Cloudflare R2, 확장 시 AWS S3)
 - 실시간: GraphQL Subscriptions (WebSocket 기반, 채팅/알림)
 
 ---

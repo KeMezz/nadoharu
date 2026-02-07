@@ -106,7 +106,7 @@ tsconfig.base.json (공통: strict, target, moduleResolution)
 
 ### 4. Docker Compose (로컬 개발)
 
-PostgreSQL만 컨테이너로 실행. 앱 서버는 로컬에서 직접 실행한다.
+PostgreSQL과 MinIO를 컨테이너로 실행. 앱 서버는 로컬에서 직접 실행한다.
 
 ```yaml
 services:
@@ -115,7 +115,25 @@ services:
     ports: 5432:5432
     environment: POSTGRES_DB, POSTGRES_USER, POSTGRES_PASSWORD
     volumes: postgres-data (named volume)
+  minio:
+    image: minio/minio
+    ports: 9000:9000, 9001:9001 (콘솔)
+    environment: MINIO_ROOT_USER, MINIO_ROOT_PASSWORD
+    command: server /data --console-address ":9001"
+    volumes: minio-data (named volume)
 ```
+
+### 5. 이미지 스토리지 전략
+
+S3 호환 오브젝트 스토리지를 사용하며, 환경별로 endpoint만 변경한다.
+
+| 환경 | 스토리지 | 비용 |
+|------|----------|------|
+| 로컬 개발 | MinIO (docker-compose) | 무료 |
+| 프로덕션 초기 | Cloudflare R2 (무료 티어: 10GB, 월 1,000만 읽기) | 무료 |
+| 프로덕션 확장 | AWS S3 (필요 시 전환) | 유료 |
+
+코드에서는 `@aws-sdk/client-s3`를 사용하고, endpoint/credentials를 환경변수로 주입한다. 스토리지 전환 시 코드 변경 없이 환경변수만 수정하면 된다.
 
 ### 5. ESLint 설정 형식
 

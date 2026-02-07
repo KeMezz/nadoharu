@@ -13,7 +13,7 @@ Always respond in Korean.
 - **apps/api**: NestJS, GraphQL Code-first, Prisma, PostgreSQL, Jest
 - **apps/web**: Next.js (App Router), Vitest, Playwright
 - **packages/shared**: 공유 타입/유틸리티
-- **인프라**: Docker, docker-compose (PostgreSQL), AWS S3
+- **인프라**: Docker, docker-compose (PostgreSQL, MinIO), Cloudflare R2 (S3 호환)
 
 ## 명령어
 
