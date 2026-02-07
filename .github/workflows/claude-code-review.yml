@@ -38,7 +38,808 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
           plugins: 'code-review@claude-code-plugins'
-          prompt: '/code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}'
+          prompt: |
+            # Nadoharu PR Review
+
+            You are conducting a comprehensive code review for PR #${{ github.event.pull_request.number }} in the Nadoharu project.
+
+            **IMPORTANT: Write all review comments, feedback, and the review body in Korean (한국어).**
+
+            ---
+
+            ## PHASE 1: COLLECT PR INFORMATION
+
+            Execute these commands to gather PR data:
+
+            ```bash
+            # Get PR metadata
+            gh pr view ${{ github.event.pull_request.number }} \
+              --json title,body,state,baseRefName,headRefName,files,additions,deletions,commits,author,url,headRefOid
+
+            # Get full diff
+            gh pr diff ${{ github.event.pull_request.number }}
+
+            # List changed files with extensions
+            gh pr view ${{ github.event.pull_request.number }} --json files --jq '.files[].path'
+            ```
+
+            Store this information for analysis in subsequent phases.
+
+            ---
+
+            ## PHASE 2: DETERMINE PR TYPE
+
+            Analyze changed files and classify the PR:
+
+            ### Classification Rules
+
+            **PLAN/DOCS PR** if ALL of:
+            - Only these extensions: `.md`, `.yaml`, `.yml`, `.json` (configuration only)
+            - OR only these paths: `openspec/`, `docs/`, `.github/`, `.claude/`
+            - AND no code files present
+
+            **CODE PR** if ANY of:
+            - Code file extensions: `.ts`, `.tsx`, `.js`, `.jsx`, `.py`, `.go`, `.rs`, `.java`, `.c`, `.cpp`, `.svelte`, `.vue`
+            - Changes in code directories: `src/`, `lib/`, `app/`, `pages/`, `components/`, `apps/`
+
+            **MIXED PR**:
+            - Both documentation and code files changed
+            - Treat as CODE PR but also apply Plan Review criteria to documentation sections
+
+            Output the decision clearly:
+            ```
+            **PR Type Detected: [PLAN/CODE/MIXED]**
+            ```
+
+            Then proceed to the appropriate review phase (3A for PLAN, 3B for CODE, both for MIXED).
+
+            ---
+
+            ## PHASE 3A: PLAN/DOCS REVIEW (if PR type = PLAN or MIXED)
+
+            Apply these 7 evaluation criteria:
+
+            ### 1. Clarity (Target: 80%+)
+
+            Count claims/statements that reference specific files and lines.
+
+            **Good examples:**
+            - "In `auth.md:45`, the authentication flow specifies..."
+            - "The design document (`design.md:12-18`) states..."
+
+            **Bad examples:**
+            - "The authentication flow should..."
+            - "According to the design..."
+
+            **Calculation:** (statements with file:line references) / (total statements) × 100
+
+            **Pass:** ≥ 80%
+
+            ---
+
+            ### 2. Testability (Target: 90%+)
+
+            Count acceptance criteria that are concrete and measurable.
+
+            **Good examples:**
+            - "API returns HTTP 200 with user object containing id, email, name fields"
+            - "Button click triggers modal within 100ms"
+            - "Error message displays when email format is invalid"
+
+            **Bad examples:**
+            - "API works properly"
+            - "UI responds quickly"
+            - "Error handling is good"
+
+            **Calculation:** (concrete criteria) / (total criteria) × 100
+
+            **Pass:** ≥ 90%
+
+            ---
+
+            ### 3. Verification
+
+            For each file referenced in the documents, verify it exists:
+
+            ```bash
+            # For each referenced file path
+            gh api repos/${{ github.repository }}/contents/<file-path>?ref=${{ github.event.pull_request.head.ref }} 2>/dev/null && echo "✓ Exists" || echo "✗ Missing"
+            ```
+
+            **Pass:** All referenced files exist
+
+            ---
+
+            ### 4. Specificity
+
+            Search for vague/ambiguous terms in the changed documents:
+
+            **Vague terms to flag:**
+            - "appropriate", "sufficient", "adequate", "reasonable"
+            - "good", "better", "best", "optimal"
+            - "properly", "correctly", "well"
+            - "various", "several", "many"
+            - "should", "could", "might" (without concrete alternatives)
+
+            Count occurrences using grep:
+            ```bash
+            gh pr diff ${{ github.event.pull_request.number }} | grep -iE '(appropriate|sufficient|adequate|reasonable|properly|correctly)' | wc -l
+            ```
+
+            **Pass:** < 3 vague terms found
+
+            ---
+
+            ### 5. Risk Identification
+
+            Check if documents include risk analysis:
+            - [ ] Has "Risk" or "Risks" heading/section
+            - [ ] Lists specific risks with likelihood/impact
+            - [ ] Includes mitigation strategies for each risk
+            - [ ] Has contingency plans
+
+            **Pass:** At least 3 of 4 checks pass
+
+            ---
+
+            ### 6. Verification Steps
+
+            Check if documents define how to verify the implementation:
+            - [ ] Has "Testing", "Verification", or "Validation" section
+            - [ ] Lists concrete test scenarios
+            - [ ] Specifies acceptance criteria for each scenario
+            - [ ] Defines success metrics
+
+            **Pass:** At least 3 of 4 checks pass
+
+            ---
+
+            ### 7. Inter-document Consistency
+
+            If multiple documents changed, cross-check consistency:
+
+            **Relationships to verify:**
+            - `proposal.md` ↔ `design.md`: Goals and approach align
+            - `design.md` ↔ `spec.md`: Technical details match
+            - `spec.md` ↔ `tasks.md`: Implementation tasks cover all specs
+            - Any contradictions in terminology, architecture, or requirements
+
+            **Pass:** No contradictions found
+
+            ---
+
+            ### Plan Review Judgment
+
+            **Pass Criteria:**
+            - Clarity ≥ 80%
+            - Testability ≥ 90%
+            - All referenced files exist
+            - < 3 vague terms
+            - Risk checks: 3+/4
+            - Verification checks: 3+/4
+            - No inter-document contradictions
+
+            **Verdict:**
+            - **APPROVED** ✅ - All criteria pass
+            - **REVISE** 🔄 - 1-2 criteria fail (fixable)
+            - **REJECT** ❌ - 3+ criteria fail (needs major rework)
+
+            ---
+
+            ## PHASE 3B: CODE REVIEW (if PR type = CODE or MIXED)
+
+            ### Fast-Path Check (Trivial Changes)
+
+            Is this a trivial change?
+            - [ ] Single line edit
+            - [ ] Obvious typo/formatting fix
+            - [ ] No functional behavior change
+            - [ ] Import/export reordering only
+
+            **If YES:** Skip Stage 1, do brief Stage 2 quality check only, then skip to Phase 4.
+
+            **If NO:** Proceed with full Two-Stage Review below.
+
+            ---
+
+            ### STAGE 1: SPEC COMPLIANCE (MANDATORY FIRST)
+
+            **Iron Law:** Do NOT proceed to Stage 2 until Stage 1 passes.
+
+            Check these 5 items by comparing PR title/body/commits against code changes:
+
+            | Check | Question | How to Verify |
+            |-------|----------|---------------|
+            | **Completeness** | Does implementation cover ALL requirements? | Compare PR description against code changes |
+            | **Correctness** | Does it solve the RIGHT problem? | Verify logic matches stated goal |
+            | **Nothing Missing** | Are all requested features present? | Look for TODO comments, incomplete functions, missing files |
+            | **Nothing Extra** | Is there unrequested functionality? | Check for scope creep, unrelated changes |
+            | **Intent Match** | Would requester recognize this? | Holistic assessment of alignment with intent |
+
+            **Stage 1 Outcome:**
+            - ✅ **PASS** (all 5 checks pass) → Proceed to Stage 2
+            - ❌ **FAIL** (any check fails) → List gaps as `issue (blocking):` comments
+              - DO NOT continue to Stage 2
+              - Final judgment: **REQUEST_CHANGES**
+              - Stop here and skip to Phase 4
+
+            ---
+
+            ### STAGE 2: CODE QUALITY (ONLY after Stage 1 passes)
+
+            Review code against these categories with severity ratings:
+
+            ---
+
+            #### 🔴 CRITICAL (Security) - Must Fix Before Merge
+
+            - [ ] **No hardcoded credentials** - API keys, passwords, tokens, secrets in source code
+              ```bash
+              # Search for hardcoded secrets
+              gh pr diff ${{ github.event.pull_request.number }} | grep -iE '(api[_-]?key|password|secret|token).*(=|:).*("|'"'"')'
+              ```
+
+            - [ ] **No SQL injection** - String concatenation in database queries
+              ```
+              ❌ query = "SELECT * FROM users WHERE id = " + userId
+              ✅ query = "SELECT * FROM users WHERE id = ?"  // Use parameterized queries
+              ```
+
+            - [ ] **No XSS vulnerabilities** - Unescaped user input in HTML/templates
+              ```
+              ❌ innerHTML = userInput
+              ✅ textContent = userInput  // or use proper escaping
+              ```
+
+            - [ ] **Input validation present** - All user inputs sanitized/validated
+            - [ ] **No path traversal** - User-controlled file paths are validated
+            - [ ] **CSRF protection** - State-changing operations have CSRF tokens
+            - [ ] **Auth/authz enforced** - Authentication and authorization properly checked
+
+            **If ANY CRITICAL issue found:**
+            - Final judgment: **REQUEST_CHANGES**
+            - Mark issues as `issue (blocking):`
+            - Stop review here
+
+            ---
+
+            #### 🟡 HIGH (Bugs & Major Code Smells) - Should Fix Before Merge
+
+            - [ ] **Functions < 50 lines** (guideline)
+              ```bash
+              # Find long functions (rough estimate)
+              gh pr diff ${{ github.event.pull_request.number }} | grep -E '^[+].*function|^[+].*=>\s*\{' -A 60 | grep -c '^[+]'
+              ```
+
+            - [ ] **Cyclomatic complexity < 10** - Limit nested if/switch/loop statements
+            - [ ] **No deep nesting** - Maximum 4 levels of indentation
+            - [ ] **Error handling present** - try/catch blocks where needed
+              ```
+              ❌ const data = await riskyOperation()  // No error handling
+              ✅ try { const data = await riskyOperation() } catch (e) { handleError(e) }
+              ```
+
+            - [ ] **No debug logging** - Remove console.log, print(), fmt.Println statements
+              ```bash
+              # Search for debug statements
+              gh pr diff ${{ github.event.pull_request.number }} | grep -E '^[+].*(console\.log|print\(|fmt\.Println)'
+              ```
+
+            - [ ] **Tests for new code** - New functions/features have corresponding tests
+              ```bash
+              # Check if test files are included in PR
+              gh pr view ${{ github.event.pull_request.number }} --json files --jq '.files[].path' | grep -E '\.(spec|test)\.'
+              ```
+
+            **If CRITICAL=0 but HIGH > 0:**
+            - Final judgment: **REQUEST_CHANGES**
+            - Mark issues as `issue (blocking):` or `suggestion (blocking):`
+
+            ---
+
+            #### 🟢 MEDIUM (Performance & Minor Issues) - Fix When Possible
+
+            - [ ] **No N+1 query patterns** - Batch database queries instead of loops
+              ```
+              ❌ for (const userId of userIds) { await getUserById(userId) }
+              ✅ const users = await getUsersByIds(userIds)
+              ```
+
+            - [ ] **Efficient algorithms** - Avoid O(n²) when O(n log n) is possible
+            - [ ] **Caching used appropriately** - Expensive operations are cached
+            - [ ] **No unnecessary re-renders** - React/Vue components optimized
+
+            **MEDIUM issues:**
+            - Can still APPROVE but add comments
+            - Mark as `suggestion (non-blocking):`
+
+            ---
+
+            #### ⚪ LOW (Style & Suggestions) - Optional Improvements
+
+            - [ ] **No untracked TODOs** - TODO comments linked to tickets or removed
+            - [ ] **Public APIs documented** - JSDoc, docstrings, or godoc present
+            - [ ] **Good variable naming** - Not x, tmp, data, thing
+            - [ ] **No magic numbers** - Extract to named constants
+            - [ ] **Consistent formatting** - Follows project style guide
+
+            **LOW issues:**
+            - APPROVE with suggestions
+            - Mark as `nitpick:` or `thought:`
+
+            ---
+
+            ### Stage 2 Outcome
+
+            | Condition | Final Judgment |
+            |-----------|----------------|
+            | Stage 1 FAIL | **REQUEST_CHANGES** |
+            | CRITICAL > 0 | **REQUEST_CHANGES** |
+            | HIGH > 0 | **REQUEST_CHANGES** |
+            | Only MEDIUM/LOW | **APPROVE** or **COMMENT** |
+
+            ---
+
+            ## PHASE 4: FORMAT INLINE COMMENTS
+
+            For each issue identified in Phase 3, format as **Conventional Comment**:
+
+            ### Label Types
+
+            | Label | Usage | Severity Mapping |
+            |-------|-------|------------------|
+            | `issue (blocking):` | Must fix before merge | CRITICAL, HIGH, Stage 1 failures |
+            | `suggestion (non-blocking):` | Recommended improvement | MEDIUM |
+            | `nitpick:` | Minor style/formatting | LOW (always non-blocking) |
+            | `praise:` | Acknowledge good code | Positive feedback |
+            | `question:` | Clarify intent/approach | Questions |
+            | `thought:` | Share ideas/future considerations | Suggestions |
+
+            ---
+
+            ### Format Template
+
+            ```
+            <label> [decoration]: <subject>
+
+            [detailed explanation]
+
+            ```suggestion
+            <proposed fix code>
+            ```
+            ```
+
+            ---
+
+            ### Examples
+
+            #### Security Issue (CRITICAL)
+            ```
+            issue (blocking): Hardcoded API key exposed
+
+            Line 42 contains an API key committed to source control, which is a critical security vulnerability. This key should be revoked immediately and replaced.
+
+            ```suggestion
+            const apiKey = process.env.API_KEY;
+            ```
+
+            Move sensitive credentials to environment variables (.env file) and add `.env` to `.gitignore`. Update deployment documentation to include required environment variables.
+            ```
+
+            #### Missing Error Handling (HIGH)
+            ```
+            issue (blocking): Unhandled promise rejection
+
+            The async operation on line 89 can throw errors, but there's no try/catch block or .catch() handler. This could crash the application.
+
+            ```suggestion
+            try {
+              const result = await riskyOperation();
+              return result;
+            } catch (error) {
+              logger.error('Operation failed:', error);
+              throw new AppError('Operation failed', 500);
+            }
+            ```
+            ```
+
+            #### Performance (MEDIUM)
+            ```
+            suggestion (non-blocking): Potential N+1 query
+
+            The loop at lines 125-130 calls `getUserById()` for each item. This creates N+1 database queries. Consider fetching all users in a single query.
+
+            ```suggestion
+            const userIds = items.map(item => item.userId);
+            const users = await getUsersByIds(userIds);
+            const usersMap = new Map(users.map(u => [u.id, u]));
+            ```
+            ```
+
+            #### Style (LOW)
+            ```
+            nitpick: Extract magic number to constant
+
+            The value `30` appears multiple times. Consider extracting to a named constant like `MAX_RETRY_ATTEMPTS` for better maintainability.
+            ```
+
+            #### Positive Feedback
+            ```
+            praise: Excellent error handling architecture
+
+            The custom error type hierarchy (AppError, ValidationError, NotFoundError) with proper error codes makes debugging much easier. Great design!
+            ```
+
+            ---
+
+            ### GitHub Suggestion Blocks
+
+            When proposing code changes, use GitHub suggestion syntax so reviewees can apply with one click:
+
+            ````markdown
+            ```suggestion
+            const correctedCode = 'here';
+            ```
+            ````
+
+            This creates an "Apply suggestion" button in the GitHub UI.
+
+            ---
+
+            ### Inline Comment Requirements
+
+            For each comment:
+            1. Identify exact file path (e.g., `apps/api/src/auth/auth.service.ts`)
+            2. Find the line number in PR diff (use `position` field, not `line` field)
+            3. Only comment on lines that were changed or are in diff context
+            4. Verify line is reviewable using: `gh api repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files`
+
+            ---
+
+            ## PHASE 5: SUBMIT REVIEW TO GITHUB
+
+            ### 5.1 Get Head Commit SHA
+
+            ```bash
+            HEAD_SHA=$(gh pr view ${{ github.event.pull_request.number }} --json headRefOid --jq '.headRefOid')
+            echo "Reviewing commit: $HEAD_SHA"
+            ```
+
+            ---
+
+            ### 5.2 Build Review Body
+
+            #### For Plan/Docs PR:
+
+            ```markdown
+            ## 📋 Plan/Docs PR Review
+
+            **PR #${{ github.event.pull_request.number }}**: [PR Title]
+
+            [1-2 sentence summary of what was reviewed]
+
+            ---
+
+            ### Judgment: [APPROVED ✅ | REVISE 🔄 | REJECT ❌]
+
+            > [One-line rationale for judgment]
+
+            ---
+
+            ### Evaluation Summary
+
+            | Criterion | Result | Details |
+            |-----------|--------|---------|
+            | Clarity | ✅/⚠️/❌ | 85% (target: 80%+) |
+            | Testability | ✅/⚠️/❌ | 92% (target: 90%+) |
+            | Verification | ✅/⚠️/❌ | All files exist |
+            | Specificity | ✅/⚠️/❌ | 2 vague terms found |
+            | Risk Identification | ✅/⚠️/❌ | 3/4 checks pass |
+            | Verification Steps | ✅/⚠️/❌ | Test plan present |
+            | Inter-doc Consistency | ✅/⚠️/❌ | No contradictions |
+
+            ---
+
+            ### Issues by Priority
+
+            **P1 (Blocking)**: [count]
+            - [List or reference inline comments]
+
+            **P2 (Recommended)**: [count]
+
+            **P3 (Optional)**: [count]
+
+            ---
+
+            ### Follow-up Recommendations
+
+            1. [Action item if applicable]
+            2. [Action item if applicable]
+
+            ---
+
+            🤖 Generated by Claude Code Review ([Workflow](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}))
+            ```
+
+            ---
+
+            #### For Code PR:
+
+            ```markdown
+            ## 🔍 Code Review
+
+            **PR #${{ github.event.pull_request.number }}**: [PR Title]
+
+            [1-2 sentence summary of changes reviewed]
+
+            ---
+
+            ### Judgment: [APPROVE ✅ | REQUEST CHANGES 🔴 | COMMENT 💬]
+
+            > [One-line rationale]
+
+            ---
+
+            ### Stage 1: Spec Compliance
+
+            - [✅/❌] Completeness
+            - [✅/❌] Correctness
+            - [✅/❌] Nothing Missing
+            - [✅/❌] Nothing Extra
+            - [✅/❌] Intent Match
+
+            **Result**: [PASS ✅ / FAIL ❌]
+
+            ---
+
+            ### Stage 2: Code Quality
+
+            | Category | Issues |
+            |----------|--------|
+            | 🔴 CRITICAL (Security) | [count] |
+            | 🟡 HIGH (Bugs) | [count] |
+            | 🟢 MEDIUM (Performance) | [count] |
+            | ⚪ LOW (Style) | [count] |
+
+            **Total Issues**: [count]
+
+            ---
+
+            ### Critical Issues
+
+            [If any CRITICAL issues exist, list them here with severity and brief description. Otherwise: "None found ✅"]
+
+            ---
+
+            ### High Priority Issues
+
+            [If any HIGH issues exist, list them here. Otherwise: "None found ✅"]
+
+            ---
+
+            ### Summary
+
+            [Brief summary of overall code quality and main themes]
+
+            ---
+
+            🤖 Generated by Claude Code Review ([Workflow](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}))
+            ```
+
+            ---
+
+            ### 5.3 Event Type Mapping
+
+            | PR Type | Judgment | GitHub Event |
+            |---------|----------|--------------|
+            | Plan | APPROVED | `COMMENT` |
+            | Plan | REVISE | `COMMENT` |
+            | Plan | REJECT | `COMMENT` |
+            | Code | APPROVE | `APPROVE` |
+            | Code | REQUEST_CHANGES | `REQUEST_CHANGES` |
+            | Code | COMMENT | `COMMENT` |
+
+            **Note:** Use `COMMENT` for plan reviews since non-maintainers cannot approve PRs.
+
+            ---
+
+            ### 5.4 Build JSON Payload
+
+            Create `/tmp/review-payload.json`:
+
+            ```bash
+            cat > /tmp/review-payload.json << 'EOFMARKER'
+            {
+              "commit_id": "REPLACE_HEAD_SHA",
+              "event": "REPLACE_EVENT",
+              "body": "REPLACE_BODY",
+              "comments": [
+                {
+                  "path": "apps/api/src/example.ts",
+                  "position": 15,
+                  "body": "issue (blocking): Example comment\n\nDetailed explanation here."
+                }
+              ]
+            }
+            EOFMARKER
+
+            # Use jq to properly escape and insert values
+            jq -n \
+              --arg commit "$HEAD_SHA" \
+              --arg event "$EVENT_TYPE" \
+              --arg body "$REVIEW_BODY" \
+              --argjson comments "$COMMENTS_JSON" \
+              '{
+                commit_id: $commit,
+                event: $event,
+                body: $body,
+                comments: $comments
+              }' > /tmp/review-payload.json
+            ```
+
+            ---
+
+            ### 5.5 Submit Review via GitHub API
+
+            ```bash
+            gh api \
+              repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews \
+              --input /tmp/review-payload.json \
+              -H "Accept: application/vnd.github+json"
+
+            echo "✅ Review submitted successfully"
+            ```
+
+            ---
+
+            ### 5.6 Error Handling
+
+            If any command fails during the review process:
+            1. Log the error to stderr
+            2. Continue with partial review if possible
+            3. Add "⚠️ Partial review: [reason]" notice to review body
+            4. Still submit whatever was completed
+
+            ---
+
+            ## PHASE 6: NADOHARU PROJECT-SPECIFIC RULES
+
+            Apply these additional checks specific to the Nadoharu project:
+
+            ---
+
+            ### 1. Backend DDD Architecture (apps/api)
+
+            **CRITICAL RULE: Dependency Direction**
+
+            ```
+            Domain ← Application ← Infrastructure
+            (Pure)   (Use Cases)   (Framework)
+            ```
+
+            **Check for violations:**
+
+            ```bash
+            # Domain should have ZERO external imports
+            grep -r "from.*application\|from.*infrastructure" apps/api/src/*/domain/ 2>/dev/null && echo "❌ Domain violation found" || echo "✅ Domain is clean"
+
+            # Application should NOT import Infrastructure
+            grep -r "from.*infrastructure" apps/api/src/*/application/ 2>/dev/null && echo "❌ Application violation found" || echo "✅ Application is clean"
+
+            # Check for cross-context Repository imports (forbidden)
+            grep -r "from.*bounded-contexts/.*/infrastructure.*Repository" apps/api/src/bounded-contexts/ 2>/dev/null && echo "❌ Cross-context Repository import found" || echo "✅ No violations"
+            ```
+
+            **If violations found:**
+            - Mark as `issue (blocking): DDD architecture violation`
+            - Explain: Bounded contexts should communicate via UseCase DI, not direct Repository access
+
+            ---
+
+            ### 2. TDD Enforcement
+
+            **REQUIRED: All code must have tests**
+
+            ```bash
+            # Get list of new .ts files (excluding .spec.ts)
+            NEW_TS_FILES=$(gh pr view ${{ github.event.pull_request.number }} --json files --jq '.files[] | select(.path | endswith(".ts")) | select(.path | contains(".spec.ts") | not) | .path')
+
+            # For each new file, check if corresponding .spec.ts exists
+            for file in $NEW_TS_FILES; do
+              spec_file="${file%.ts}.spec.ts"
+              if ! gh pr view ${{ github.event.pull_request.number }} --json files --jq '.files[].path' | grep -q "$spec_file"; then
+                echo "❌ Missing test: $spec_file for $file"
+              fi
+            done
+            ```
+
+            **If test files missing:**
+            - Mark as `issue (blocking): Missing tests`
+            - Explain: "All code must have corresponding unit tests (*.spec.ts). TDD is mandatory in this project."
+
+            **Test coverage target:** 80%+
+
+            ---
+
+            ### 3. PR Size Check
+
+            **Guideline: ~500 lines or less**
+
+            ```bash
+            TOTAL_CHANGES=$(gh pr view ${{ github.event.pull_request.number }} --json additions,deletions --jq '.additions + .deletions')
+
+            if [ "$TOTAL_CHANGES" -gt 500 ]; then
+              echo "⚠️ Large PR detected: $TOTAL_CHANGES lines changed"
+              echo "Recommendation: Consider breaking into smaller PRs (target: ~500 lines)"
+            fi
+            ```
+
+            **If > 500 lines:**
+            - Add `suggestion (non-blocking):` comment suggesting to split PR
+            - Not blocking, but strongly encouraged
+
+            ---
+
+            ### 4. Commit Convention Check
+
+            **Required format:** `<type>(<scope>): <description>` (Conventional Commits, Korean description)
+
+            **Valid types:** `feat`, `fix`, `docs`, `chore`, `refactor`, `test`, `style`, `perf`
+
+            ```bash
+            # Check commit messages
+            INVALID_COMMITS=$(gh pr view ${{ github.event.pull_request.number }} --json commits --jq '.commits[].messageHeadline' | grep -v -E '^(feat|fix|docs|chore|refactor|test|style|perf)\([^)]+\):')
+
+            if [ -n "$INVALID_COMMITS" ]; then
+              echo "⚠️ Found commits not following Conventional Commits convention:"
+              echo "$INVALID_COMMITS"
+            fi
+            ```
+
+            **If violations found:**
+            - Add `nitpick:` comment about commit message format
+            - Not blocking, but should follow convention
+
+            ---
+
+            ### 5. CLAUDE.md Update Check
+
+            **If PR changes any of these, CLAUDE.md MUST be updated:**
+            - Architecture (new bounded contexts, layers)
+            - Commands (new scripts in package.json)
+            - Conventions (new rules, patterns)
+            - Skills (new /.claude/skills)
+
+            ```bash
+            FILES=$(gh pr view ${{ github.event.pull_request.number }} --json files --jq '.files[].path')
+
+            # Check if architecture/config changed
+            if echo "$FILES" | grep -qE '(src/bounded-contexts|package\.json|\.claude/skills)'; then
+              # Check if CLAUDE.md was also updated
+              if ! echo "$FILES" | grep -q "CLAUDE.md"; then
+                echo "❌ CLAUDE.md not updated"
+                echo "Architecture, commands, or skills changed but CLAUDE.md was not updated"
+              fi
+            fi
+            ```
+
+            **If CLAUDE.md not updated when required:**
+            - Mark as `issue (blocking): CLAUDE.md update required`
+            - Explain what changed and why documentation is needed
+
+            ---
+
+            ## EXECUTION INSTRUCTIONS
+
+            1. Execute all phases in order: 1 → 2 → 3 → 4 → 5 → 6
+            2. For Phase 3, execute ONLY the appropriate section (3A for PLAN, 3B for CODE, both for MIXED)
+            3. Collect all issues identified across all phases
+            4. Format each issue as a Conventional Comment
+            5. Build the review body with appropriate judgment
+            6. Submit the complete review to GitHub via API
+            7. Report the review URL and summary to workflow logs
+
+            Execute this comprehensive review now for PR #${{ github.event.pull_request.number }}.
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://code.claude.com/docs/en/cli-reference for available options
 
