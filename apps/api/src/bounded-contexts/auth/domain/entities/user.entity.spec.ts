@@ -139,7 +139,7 @@ describe('User Entity', () => {
     it('DB 데이터로 User를 재구성해야 한다', () => {
       // given
       const props = {
-        id: 'clxyz123abc456def789',
+        id: '550e8400-e29b-41d4-a716-446655440000',
         accountId: 'user_789',
         email: 'db@example.com',
         name: 'DB사용자',
@@ -152,7 +152,7 @@ describe('User Entity', () => {
       const user = User.reconstitute(props);
 
       // then - 모든 필드가 정확히 복원되어야 함
-      expect(user.getId()).toBe('clxyz123abc456def789');
+      expect(user.getId()).toBe('550e8400-e29b-41d4-a716-446655440000');
       expect(user.getAccountId().getValue()).toBe('user_789');
       expect(user.getEmail().getValue()).toBe('db@example.com');
       expect(user.getName()).toBe('DB사용자');
@@ -164,7 +164,7 @@ describe('User Entity', () => {
     it('reconstitute 시에도 AccountId VO 검증을 수행해야 한다', () => {
       // given - 무효한 accountId
       const props = {
-        id: 'clxyz123abc456def789',
+        id: '550e8400-e29b-41d4-a716-446655440000',
         accountId: 'ab', // 너무 짧음
         email: 'db@example.com',
         name: 'DB사용자',
@@ -180,7 +180,7 @@ describe('User Entity', () => {
     it('reconstitute 시에도 Email VO 검증을 수행해야 한다', () => {
       // given - 무효한 email
       const props = {
-        id: 'clxyz123abc456def789',
+        id: '550e8400-e29b-41d4-a716-446655440000',
         accountId: 'user_789',
         email: 'invalid-email',
         name: 'DB사용자',
@@ -196,7 +196,7 @@ describe('User Entity', () => {
     it('reconstitute 시에도 name 검증을 수행해야 한다', () => {
       // given - 빈 name
       const props = {
-        id: 'clxyz123abc456def789',
+        id: '550e8400-e29b-41d4-a716-446655440000',
         accountId: 'user_789',
         email: 'db@example.com',
         name: '',
