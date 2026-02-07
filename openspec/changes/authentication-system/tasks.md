@@ -9,6 +9,8 @@
 ## 2. Prisma Schema 및 Migration
 
 - [ ] 2.1 User 모델 정의 (id, accountId, email, name, passwordHash, createdAt, updatedAt)
+  - email 필드에 저장 전 소문자 변환 보장 (애플리케이션 레이어)
+  - 또는 Prisma migration에서 LOWER() 함수 기반 unique index 고려
 - [ ] 2.2 accountId와 email에 @unique 제약조건 추가
 - [ ] 2.3 Prisma migration 생성 및 실행: `npx prisma migrate dev --name add-user-model`
 - [ ] 2.4 Prisma Client 재생성: `npx prisma generate`
