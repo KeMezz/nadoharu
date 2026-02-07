@@ -38,14 +38,14 @@
 
 ## 5. Docker 및 개발 환경
 
-- [ ] 5.1 `docker-compose.yml` 생성 (PostgreSQL 17 Alpine, 포트 5432, named volume)
-- [ ] 5.2 `.env.example` 생성 (DB 접속 정보 등 환경 변수 템플릿)
-- [ ] 5.3 `docker compose up -d` 로 PostgreSQL 컨테이너 정상 실행 확인
+- [x] 5.1 `docker-compose.yml` 생성 (PostgreSQL 17 Alpine, 포트 5432, named volume)
+- [x] 5.2 `.env.example` 생성 (DB 접속 정보 등 환경 변수 템플릿)
+- [x] 5.3 `docker compose up -d` 로 PostgreSQL 컨테이너 정상 실행 확인
 
 ## 6. 전체 검증
 
-- [ ] 6.1 루트에서 `pnpm install` 정상 완료 확인
-- [ ] 6.2 루트에서 `pnpm build` 전체 빌드 정상 확인
-- [ ] 6.3 루트에서 `pnpm lint` 전체 린트 정상 확인
-- [ ] 6.4 루트에서 `pnpm test` 전체 테스트 정상 확인
-- [ ] 6.5 루트에서 `pnpm dev` 로 api + web 동시 실행 확인
+- [x] 6.1 루트에서 `pnpm install` 정상 완료 확인
+- [x] 6.2 루트에서 `pnpm build` 전체 빌드 정상 확인
+- [x] 6.3 루트에서 `pnpm lint` 전체 린트 정상 확인
+- [x] 6.4 루트에서 `pnpm test` 전체 테스트 정상 확인
+- [x] 6.5 루트에서 `pnpm dev` 로 api + web 동시 실행 확인
