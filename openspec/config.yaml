@@ -1,0 +1,24 @@
+schema: spec-driven
+
+context: |
+  프로젝트: 나도하루 (Nadoharu) - 모바일 우선 소셜 플랫폼
+  도메인: 일상 공유 + 공감("나도!") 소셜 미디어
+  구조: pnpm workspace 모노레포
+    - apps/api: NestJS (DDD/Clean Architecture), GraphQL Code-first, Prisma, PostgreSQL
+    - apps/web: Next.js (재작성)
+    - packages/shared: 공유 타입/유틸리티
+  인증: Passport + JWT
+  실시간: GraphQL Subscriptions (WebSocket)
+  배포: Docker
+  언어: TypeScript
+  모든 문서와 커밋은 한국어로 작성
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always include a "Non-goals" section
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
