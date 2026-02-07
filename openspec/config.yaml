@@ -9,6 +9,10 @@ context: |
     - packages/shared: 공유 타입/유틸리티
   인증: Passport + JWT
   실시간: GraphQL Subscriptions (WebSocket)
+  테스트: TDD 필수 (RED → GREEN → REFACTOR)
+    - 백엔드: Jest (Unit + Integration), 커버리지 80%+
+    - 프론트엔드: Vitest (Unit) + Playwright (E2E), 커버리지 80%+
+    - 테스트 없는 코드는 머지 불가
   배포: Docker
   언어: TypeScript
   모든 문서와 커밋은 한국어로 작성
