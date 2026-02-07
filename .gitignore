@@ -1,0 +1,30 @@
+# dependencies
+node_modules/
+
+# build outputs
+dist/
+build/
+.next/
+
+# environment variables
+.env
+.env.*
+!.env.example
+
+# logs
+*.log
+
+# testing
+coverage/
+
+# turbo
+.turbo/
+
+# OS
+.DS_Store
+
+# TypeScript
+*.tsbuildinfo
+
+# omc
+.omc/
