@@ -7,7 +7,7 @@ services:
       - "5432:5432"
     environment:
       POSTGRES_USER: nadoharu
-      POSTGRES_PASSWORD: nadoharu_dev
+      POSTGRES_PASSWORD: nadoharu_dev  # PRODUCTION: Change to strong password
       POSTGRES_DB: nadoharu
     volumes:
       - nadoharu-postgres-data:/var/lib/postgresql/data
