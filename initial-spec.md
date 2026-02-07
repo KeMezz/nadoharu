@@ -196,38 +196,10 @@ nadoharu/
 - [x] 실시간 통신: **GraphQL Subscriptions** (WebSocket)
 - [x] 인증: **Passport + JWT**
 - [x] 테스트 전략: **TDD 필수** (백엔드 Jest, 프론트 Vitest + Playwright E2E)
-- [x] 이미지 스토리지: **S3 호환** (로컬 MinIO → Cloudflare R2 → AWS S3)
-- [x] PR Preview 배포: **Vercel 또는 Netlify** (아래 CI 전략 참조)
-
----
-
-## CI 전략
-
-### PR Preview 배포 (프론트엔드)
-
-PR이 올라올 때마다 `apps/web`을 자동 빌드하여 프리뷰 URL을 생성한다.
-
-| 항목 | 내용 |
-|------|------|
-| **플랫폼** | Vercel 또는 Netlify (수동 연동 필요) |
-| **트리거** | PR 생성/업데이트 시 자동 빌드 |
-| **프리뷰 URL** | PR별 고유 URL 자동 생성 (예: `pr-42.nadoharu.vercel.app`) |
-| **대상** | `apps/web` (Next.js) |
-| **환경변수** | API endpoint는 스테이징/목 서버를 가리킴 |
-
-**수동 설정 필요 사항:**
-1. Vercel/Netlify에 GitHub 레포 연결
-2. Root Directory를 `apps/web`으로 설정
-3. Build Command: `pnpm --filter web build`
-4. Install Command: `pnpm install`
-5. 환경변수 설정 (API URL 등)
-
-**참고:** 백엔드(API) Preview는 별도 인프라가 필요하므로 초기에는 프론트엔드만 Preview 배포한다. 백엔드는 로컬 또는 스테이징 서버를 공유한다.
 
 ## 미결정 사항
 
 > 개발하면서 결정할 것들
 
-- [ ] CI/CD 파이프라인 구성 (GitHub Actions: lint, test, build)
+- [ ] CI/CD 파이프라인 구성
 - [ ] Prisma + DDD 레이어 분리 수준 (순수 DDD vs 실용적 DDD)
-- [ ] PR Preview 플랫폼 최종 선택 (Vercel vs Netlify)
