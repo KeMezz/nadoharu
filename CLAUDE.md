@@ -10,31 +10,36 @@ Always respond in Korean.
 
 ## 기술 스택
 
-- **apps/api**: NestJS, GraphQL Code-first, Prisma, PostgreSQL, Jest
-- **apps/web**: Next.js (App Router), Vitest, Playwright
+- **apps/api**: NestJS 11, GraphQL Code-first, Prisma, PostgreSQL 17, Jest
+- **apps/web**: Next.js 15 (App Router), React 19, Vitest, Playwright
 - **packages/shared**: 공유 타입/유틸리티
-- **인프라**: Docker, docker-compose (PostgreSQL, MinIO), Cloudflare R2 (S3 호환)
+- **인프라**: Docker Compose (PostgreSQL 17 Alpine), Cloudflare R2 (S3 호환)
+- **개발 도구**: pnpm workspace, TypeScript 5.7 (strict mode), ESLint 9, Prettier
 
 ## 명령어
 
 ```bash
 # 루트에서 실행
 pnpm install          # 전체 의존성 설치
-pnpm dev              # api + web 동시 개발 서버
+pnpm dev              # api(3001) + web(3000) 동시 개발 서버
 pnpm build            # 전체 빌드
 pnpm lint             # 전체 린트
 pnpm test             # 전체 테스트 (unit + integration)
 pnpm test:e2e         # Playwright E2E 테스트
 
 # 개별 앱
-pnpm --filter api dev           # 백엔드만 실행
-pnpm --filter web dev           # 프론트엔드만 실행
+pnpm --filter api dev           # 백엔드만 실행 (http://localhost:3001)
+pnpm --filter web dev           # 프론트엔드만 실행 (http://localhost:3000)
 pnpm --filter api test          # 백엔드 테스트만
+pnpm --filter api test:watch    # 백엔드 테스트 watch 모드
+pnpm --filter api test:cov      # 백엔드 테스트 커버리지
 pnpm --filter web test          # 프론트엔드 테스트만
+pnpm --filter web test:watch    # 프론트엔드 테스트 watch 모드
 
 # 인프라
-docker compose up -d            # PostgreSQL 시작
+docker compose up -d            # PostgreSQL 시작 (localhost:5432)
 docker compose down             # PostgreSQL 중지
+docker compose ps               # 컨테이너 상태 확인
 ```
 
 ## 필수 규칙
@@ -117,4 +122,38 @@ src/
 /opsx:apply    →  tasks 기반 구현
 /opsx:verify   →  구현 검증
 /opsx:archive  →  완료 후 아카이브
+```
+
+## 환경 설정
+
+### 로컬 개발 환경 설정
+
+1. **환경 변수 설정**
+   ```bash
+   cp .env.example .env
+   # .env 파일을 열어 필요한 값 수정
+   ```
+
+2. **데이터베이스 시작**
+   ```bash
+   docker compose up -d
+   ```
+
+3. **의존성 설치 및 실행**
+   ```bash
+   pnpm install
+   pnpm dev
+   ```
+
+### 포트 구성
+
+- **Web (Next.js)**: http://localhost:3000
+- **API (NestJS)**: http://localhost:3001
+- **PostgreSQL**: localhost:5432
+
+### 데이터베이스 연결
+
+기본 연결 정보 (`.env.example` 참고):
+```
+DATABASE_URL="postgresql://nadoharu:nadoharu_dev@localhost:5432/nadoharu"
 ```

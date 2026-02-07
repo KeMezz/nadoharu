@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: nadoharu-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: nadoharu
+      POSTGRES_PASSWORD: nadoharu_dev  # PRODUCTION: Change to strong password
+      POSTGRES_DB: nadoharu
+    volumes:
+      - nadoharu-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nadoharu"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  nadoharu-postgres-data:
+    name: nadoharu-postgres-data
