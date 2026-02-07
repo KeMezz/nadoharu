@@ -1,17 +1,17 @@
 ## 1. 프로젝트 루트 초기화
 
-- [ ] 1.1 Git 초기화 및 `.gitignore` 작성 (node_modules, dist, .env, .env.* 등)
-- [ ] 1.2 루트 `package.json` 생성 (프로젝트 메타데이터, 루트 스크립트: dev, build, lint, test, test:e2e)
-- [ ] 1.3 `pnpm-workspace.yaml` 생성 (`apps/*`, `packages/*` 등록)
-- [ ] 1.4 루트 `tsconfig.base.json` 생성 (strict: true, 공통 컴파일러 옵션)
-- [ ] 1.5 루트 `.prettierrc` 생성
-- [ ] 1.6 루트 ESLint flat config 설정 생성 (`eslint.config.mjs`)
+- [x] 1.1 Git 초기화 및 `.gitignore` 작성 (node_modules, dist, .env, .env.* 등)
+- [x] 1.2 루트 `package.json` 생성 (프로젝트 메타데이터, 루트 스크립트: dev, build, lint, test, test:e2e)
+- [x] 1.3 `pnpm-workspace.yaml` 생성 (`apps/*`, `packages/*` 등록)
+- [x] 1.4 루트 `tsconfig.base.json` 생성 (strict: true, 공통 컴파일러 옵션)
+- [x] 1.5 루트 `.prettierrc` 생성
+- [x] 1.6 루트 ESLint flat config 설정 생성 (`eslint.config.mjs`)
 
 ## 2. packages/shared 공유 패키지
 
-- [ ] 2.1 `packages/shared/package.json` 생성 (패키지명: `@nadoharu/shared`)
-- [ ] 2.2 `packages/shared/tsconfig.json` 생성 (루트 extends, declaration 출력)
-- [ ] 2.3 `packages/shared/src/index.ts` 빈 엔트리 파일 생성
+- [x] 2.1 `packages/shared/package.json` 생성 (패키지명: `@nadoharu/shared`)
+- [x] 2.2 `packages/shared/tsconfig.json` 생성 (루트 extends, declaration 출력)
+- [x] 2.3 `packages/shared/src/index.ts` 빈 엔트리 파일 생성
 
 ## 3. apps/api NestJS 프로젝트 (`/nestjs-ddd` 스킬 사용)
 
@@ -28,7 +28,7 @@
 ## 4. apps/web Next.js 프로젝트
 
 - [ ] 4.1 `apps/web/package.json` 생성 (Next.js 의존성, `@nadoharu/shared` workspace 참조)
-- [ ] 4.2 `apps/web/tsconfig.json` 생성 (루트 extends, jsx, Next.js 플러그인)
+- [ ] 4.2 `apps/web/tsconfig.json` 생성 (루트 extends, jsx, Next.js 플러그인, module/moduleResolution을 bundler로 오버라이드)
 - [ ] 4.3 `apps/web/next.config.ts` 생성
 - [ ] 4.4 `apps/web/app/layout.tsx` 및 `apps/web/app/page.tsx` 생성
 - [ ] 4.5 Vitest 테스트 환경 설정 (`vitest.config.ts`)
