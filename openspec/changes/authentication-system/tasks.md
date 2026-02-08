@@ -43,10 +43,10 @@
 
 ## 7. Application Layer - Use Cases
 
-- [ ] 7.1 RegisterUserUseCase 구현 (VO 검증, 중복 확인, 비밀번호 해싱, 저장)
-- [ ] 7.2 RegisterUserUseCase 단위 테스트 (성공, 중복 accountId, 중복 email, 정책 위반)
-- [ ] 7.3 AuthenticateUserUseCase 구현 (계정 조회, bcrypt 검증, JWT 발급)
-- [ ] 7.4 AuthenticateUserUseCase 단위 테스트 (성공, 존재하지 않는 계정, 잘못된 비밀번호)
+- [x] 7.1 RegisterUserUseCase 구현 (VO 검증, 중복 확인, 비밀번호 해싱, 저장)
+- [x] 7.2 RegisterUserUseCase 단위 테스트 (성공, 중복 accountId, 중복 email, 정책 위반)
+- [x] 7.3 AuthenticateUserUseCase 구현 (계정 조회, bcrypt 검증, JWT 발급)
+- [x] 7.4 AuthenticateUserUseCase 단위 테스트 (성공, 존재하지 않는 계정, 잘못된 비밀번호)
 
 ## 8. Infrastructure Layer - Prisma Repository
 
