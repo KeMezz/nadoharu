@@ -43,6 +43,12 @@ describe('PasswordService', () => {
       // bcrypt 해시 형식: $2b$10$... (10은 salt rounds)
       expect(hashedPassword).toMatch(/^\$2b\$10\$/);
     });
+
+    it('빈 문자열도 해싱할 수 있어야 한다', async () => {
+      const hashedPassword = await passwordService.hash('');
+      expect(hashedPassword).toBeDefined();
+      expect(hashedPassword).toMatch(/^\$2b\$10\$/);
+    });
   });
 
   describe('compare', () => {
@@ -81,18 +87,6 @@ describe('PasswordService', () => {
       const result = await passwordService.compare('', hashedPassword);
 
       expect(result).toBe(false);
-    });
-  });
-
-  describe('salt rounds', () => {
-    it('해시 생성 시 salt rounds 10을 사용해야 한다', async () => {
-      const plainPassword = 'TestP@ssw0rd123';
-
-      const hashedPassword = await passwordService.hash(plainPassword);
-
-      // bcrypt 해시의 두 번째 필드가 salt rounds
-      const saltRounds = hashedPassword.split('$')[2];
-      expect(saltRounds).toBe('10');
     });
   });
 });
