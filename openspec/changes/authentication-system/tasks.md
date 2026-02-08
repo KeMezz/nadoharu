@@ -32,14 +32,14 @@
 
 ## 5. Domain Layer - Services
 
-- [ ] 5.1 PasswordService 구현 (hash, compare with bcrypt)
-- [ ] 5.2 PasswordService 단위 테스트 (해싱, 비교, salt rounds 10)
-- [ ] 5.3 PasswordService에서 bcrypt salt rounds 10 설정
+- [x] 5.1 PasswordService 구현 (hash, compare with bcrypt)
+- [x] 5.2 PasswordService 단위 테스트 (해싱, 비교, salt rounds 10)
+- [x] 5.3 PasswordService에서 bcrypt salt rounds 10 설정
 
 ## 6. Application Layer - Repository Interface
 
-- [ ] 6.1 IUserRepository 인터페이스 정의 (save, findByAccountId, findByEmail, findById)
-- [ ] 6.2 Repository 메서드 시그니처 정의 (Promise 반환 타입)
+- [x] 6.1 UserRepository 인터페이스 정의 (save, findByAccountId, findByEmail, findById)
+- [x] 6.2 Repository 메서드 시그니처 정의 (Promise 반환 타입)
 
 ## 7. Application Layer - Use Cases
 
@@ -50,7 +50,7 @@
 
 ## 8. Infrastructure Layer - Prisma Repository
 
-- [ ] 8.1 PrismaUserRepository 구현 (IUserRepository 구현체)
+- [ ] 8.1 PrismaUserRepository 구현 (UserRepository 구현체)
 - [ ] 8.2 PrismaUserRepository.save() 구현 (User 엔티티 → Prisma 모델 매핑)
 - [ ] 8.3 PrismaUserRepository.findByAccountId() 구현 (소문자 비교)
 - [ ] 8.4 PrismaUserRepository.findByEmail() 구현 (소문자 비교)
@@ -111,7 +111,7 @@
 - [ ] 15.2 PassportModule, JwtModule 임포트
 - [ ] 15.3 JwtStrategy Provider 등록
 - [ ] 15.4 UseCases Provider 등록
-- [ ] 15.5 PrismaUserRepository Provider 등록 (IUserRepository 토큰)
+- [ ] 15.5 PrismaUserRepository Provider 등록 (UserRepository 토큰)
 - [ ] 15.6 AuthResolver Provider 등록
 - [ ] 15.7 AppModule에 AuthModule 임포트
 
