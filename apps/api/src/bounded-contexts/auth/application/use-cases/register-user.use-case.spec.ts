@@ -3,6 +3,10 @@ import { UserRepository } from '../ports/user.repository.interface';
 import { PasswordService } from '../../domain/services/password.service';
 import { User } from '../../domain/entities/user.entity';
 import { AccountIdError } from '../../domain/errors/account-id.error';
+import {
+  AccountIdAlreadyExistsError,
+  EmailAlreadyExistsError,
+} from '../../domain/errors/auth.error';
 
 describe('RegisterUserUseCase', () => {
   let useCase: RegisterUserUseCase;
@@ -102,7 +106,7 @@ describe('RegisterUserUseCase', () => {
 
       // when & then
       await expect(useCase.execute(input)).rejects.toThrow(
-        'ACCOUNT_ID_ALREADY_EXISTS',
+        AccountIdAlreadyExistsError,
       );
 
       // 중복 확인 후 더 이상 진행하지 않음
@@ -135,7 +139,7 @@ describe('RegisterUserUseCase', () => {
 
       // when & then
       await expect(useCase.execute(input)).rejects.toThrow(
-        'EMAIL_ALREADY_EXISTS',
+        EmailAlreadyExistsError,
       );
 
       // accountId 중복 확인 후 email 중복 확인까지 진행

@@ -3,6 +3,7 @@ import { User } from '../../domain/entities/user.entity';
 import { PasswordService } from '../../domain/services/password.service';
 import { UserRepository } from '../ports/user.repository.interface';
 import { AuthenticateUserUseCase } from './authenticate-user.use-case';
+import { InvalidCredentialsError } from '../../domain/errors/auth.error';
 
 describe('AuthenticateUserUseCase', () => {
   let useCase: AuthenticateUserUseCase;
@@ -80,7 +81,7 @@ describe('AuthenticateUserUseCase', () => {
 
       // When & Then
       await expect(useCase.execute({ accountId, password })).rejects.toThrow(
-        'INVALID_CREDENTIALS',
+        InvalidCredentialsError,
       );
       expect(userRepository.findByAccountId).toHaveBeenCalledWith(accountId);
       expect(passwordService.compare).not.toHaveBeenCalled();
@@ -97,7 +98,7 @@ describe('AuthenticateUserUseCase', () => {
 
       // When & Then
       await expect(useCase.execute({ accountId, password })).rejects.toThrow(
-        'INVALID_CREDENTIALS',
+        InvalidCredentialsError,
       );
       expect(userRepository.findByAccountId).toHaveBeenCalledWith(accountId);
       expect(passwordService.compare).toHaveBeenCalledWith(

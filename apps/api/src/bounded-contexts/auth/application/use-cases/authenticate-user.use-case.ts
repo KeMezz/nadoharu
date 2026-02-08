@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PasswordService } from '../../domain/services/password.service';
 import { UserRepository } from '../ports/user.repository.interface';
+import { InvalidCredentialsError } from '../../domain/errors/auth.error';
 
 interface AuthenticateUserInput {
   accountId: string;
@@ -38,7 +39,7 @@ export class AuthenticateUserUseCase {
     // 1. accountId로 사용자 조회
     const user = await this.userRepository.findByAccountId(accountId);
     if (!user) {
-      throw new Error('INVALID_CREDENTIALS');
+      throw new InvalidCredentialsError();
     }
 
     // 2. 비밀번호 검증
@@ -47,7 +48,7 @@ export class AuthenticateUserUseCase {
       user.getPasswordHash(),
     );
     if (!isPasswordValid) {
-      throw new Error('INVALID_CREDENTIALS');
+      throw new InvalidCredentialsError();
     }
 
     // 3. JWT 토큰 발급

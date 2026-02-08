@@ -1,7 +1,14 @@
+import { Injectable } from '@nestjs/common';
 import { UserRepository } from '../ports/user.repository.interface';
 import { PasswordService } from '../../domain/services/password.service';
 import { User } from '../../domain/entities/user.entity';
 import { Password } from '../../domain/value-objects/password.vo';
+import { AccountId } from '../../domain/value-objects/account-id.vo';
+import { Email } from '../../domain/value-objects/email.vo';
+import {
+  AccountIdAlreadyExistsError,
+  EmailAlreadyExistsError,
+} from '../../domain/errors/auth.error';
 
 export interface RegisterUserInput {
   accountId: string;
@@ -25,6 +32,7 @@ export interface RegisterUserInput {
  * - Domain Layer만 의존 (PasswordService, User, VO)
  * - Repository는 인터페이스로 DI
  */
+@Injectable()
 export class RegisterUserUseCase {
   constructor(
     private readonly userRepository: UserRepository,
@@ -37,7 +45,7 @@ export class RegisterUserUseCase {
       input.accountId,
     );
     if (existingUserByAccountId) {
-      throw new Error('ACCOUNT_ID_ALREADY_EXISTS');
+      throw new AccountIdAlreadyExistsError();
     }
 
     // 2. 중복 확인 - email
@@ -45,25 +53,19 @@ export class RegisterUserUseCase {
       input.email,
     );
     if (existingUserByEmail) {
-      throw new Error('EMAIL_ALREADY_EXISTS');
+      throw new EmailAlreadyExistsError();
     }
 
     // 3. VO 검증 (Password, AccountId, Email, Name)
     Password.create(input.password);
+    AccountId.create(input.accountId);
+    Email.create(input.email);
+    // Name 검증은 User.create() 내부에서 수행
 
-    // 4. User 엔티티 생성 (AccountId, Email, Name 검증 포함)
-    // 임시 passwordHash로 VO 검증 수행
-    const userWithoutHash = User.create({
-      accountId: input.accountId,
-      email: input.email,
-      name: input.name,
-      passwordHash: '', // 임시값, 아직 해싱하지 않음
-    });
-
-    // 5. 비밀번호 해싱 (모든 VO 검증 통과 후)
+    // 4. 비밀번호 해싱 (모든 VO 검증 통과 후)
     const passwordHash = await this.passwordService.hash(input.password);
 
-    // 6. 최종 User 엔티티 생성 (실제 passwordHash 포함)
+    // 5. User 엔티티 생성 및 저장 (한 번만)
     const user = User.create({
       accountId: input.accountId,
       email: input.email,
@@ -71,7 +73,6 @@ export class RegisterUserUseCase {
       passwordHash,
     });
 
-    // 7. User 저장
     return await this.userRepository.save(user);
   }
 }
