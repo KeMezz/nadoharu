@@ -50,12 +50,12 @@
 
 ## 8. Infrastructure Layer - Prisma Repository
 
-- [ ] 8.1 PrismaUserRepository 구현 (UserRepository 구현체)
-- [ ] 8.2 PrismaUserRepository.save() 구현 (User 엔티티 → Prisma 모델 매핑)
-- [ ] 8.3 PrismaUserRepository.findByAccountId() 구현 (소문자 비교)
-- [ ] 8.4 PrismaUserRepository.findByEmail() 구현 (소문자 비교)
-- [ ] 8.5 PrismaUserRepository.findById() 구현
-- [ ] 8.6 PrismaUserRepository 통합 테스트 (실제 DB 연동)
+- [x] 8.1 PrismaUserRepository 구현 (UserRepository 구현체)
+- [x] 8.2 PrismaUserRepository.save() 구현 (User 엔티티 → Prisma 모델 매핑)
+- [x] 8.3 PrismaUserRepository.findByAccountId() 구현 (소문자 비교)
+- [x] 8.4 PrismaUserRepository.findByEmail() 구현 (소문자 비교)
+- [x] 8.5 PrismaUserRepository.findById() 구현
+- [x] 8.6 PrismaUserRepository 통합 테스트 (실제 DB 연동)
 
 ## 9. Infrastructure Layer - JWT Module
 

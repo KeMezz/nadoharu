@@ -4,6 +4,7 @@ const config: Config = {
   moduleFileExtensions: ['js', 'json', 'ts'],
   rootDir: '.',
   testRegex: '.*\\.spec\\.ts$',
+  testPathIgnorePatterns: ['\\.integration\\.spec\\.ts$'],
   transform: {
     '^.+\\.ts$': 'ts-jest',
   },
@@ -20,6 +21,7 @@ const config: Config = {
   testEnvironment: 'node',
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    '^@prisma/client$': '<rootDir>/src/__mocks__/@prisma/client.ts',
   },
 };
 
