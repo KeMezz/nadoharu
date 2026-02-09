@@ -158,4 +158,128 @@ describe('PrismaUserRepository', () => {
       });
     });
   });
+
+  describe('findByAccountId', () => {
+    it('accountId로 사용자를 조회하고 User 엔티티를 반환해야 한다', async () => {
+      // Given
+      const recordData = {
+        id: 'test-uuid',
+        accountId: 'testuser',
+        email: 'test@example.com',
+        name: '테스트 사용자',
+        passwordHash: 'hashed_password',
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
+      };
+
+      jest.spyOn(prisma.user, 'findFirst').mockResolvedValue(recordData);
+
+      // When
+      const result = await repository.findByAccountId('TestUser');
+
+      // Then
+      expect(prisma.user.findFirst).toHaveBeenCalledWith({
+        where: {
+          accountId: {
+            equals: 'TestUser',
+            mode: 'insensitive',
+          },
+        },
+      });
+      expect(result).toBeInstanceOf(User);
+      expect(result!.getAccountId().getValue()).toBe('testuser');
+    });
+
+    it('존재하지 않는 accountId로 조회하면 null을 반환해야 한다', async () => {
+      // Given
+      jest.spyOn(prisma.user, 'findFirst').mockResolvedValue(null);
+
+      // When
+      const result = await repository.findByAccountId('nonexistent');
+
+      // Then
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('findByEmail', () => {
+    it('email로 사용자를 조회하고 User 엔티티를 반환해야 한다', async () => {
+      // Given
+      const recordData = {
+        id: 'test-uuid',
+        accountId: 'testuser',
+        email: 'test@example.com',
+        name: '테스트 사용자',
+        passwordHash: 'hashed_password',
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
+      };
+
+      jest.spyOn(prisma.user, 'findFirst').mockResolvedValue(recordData);
+
+      // When
+      const result = await repository.findByEmail('Test@Example.com');
+
+      // Then
+      expect(prisma.user.findFirst).toHaveBeenCalledWith({
+        where: {
+          email: {
+            equals: 'Test@Example.com',
+            mode: 'insensitive',
+          },
+        },
+      });
+      expect(result).toBeInstanceOf(User);
+      expect(result!.getEmail().getValue()).toBe('test@example.com');
+    });
+
+    it('존재하지 않는 email로 조회하면 null을 반환해야 한다', async () => {
+      // Given
+      jest.spyOn(prisma.user, 'findFirst').mockResolvedValue(null);
+
+      // When
+      const result = await repository.findByEmail('nonexistent@example.com');
+
+      // Then
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('findById', () => {
+    it('id로 사용자를 조회하고 User 엔티티를 반환해야 한다', async () => {
+      // Given
+      const recordData = {
+        id: 'test-uuid',
+        accountId: 'testuser',
+        email: 'test@example.com',
+        name: '테스트 사용자',
+        passwordHash: 'hashed_password',
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
+      };
+
+      jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(recordData);
+
+      // When
+      const result = await repository.findById('test-uuid');
+
+      // Then
+      expect(prisma.user.findUnique).toHaveBeenCalledWith({
+        where: { id: 'test-uuid' },
+      });
+      expect(result).toBeInstanceOf(User);
+      expect(result!.getId()).toBe('test-uuid');
+    });
+
+    it('존재하지 않는 id로 조회하면 null을 반환해야 한다', async () => {
+      // Given
+      jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(null);
+
+      // When
+      const result = await repository.findById('nonexistent-uuid');
+
+      // Then
+      expect(result).toBeNull();
+    });
+  });
 });

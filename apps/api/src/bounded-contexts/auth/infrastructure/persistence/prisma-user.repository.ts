@@ -47,15 +47,7 @@ export class PrismaUserRepository implements UserRepository {
     });
 
     // 3. Prisma 모델 → User 엔티티 재구성
-    return User.reconstitute({
-      id: savedUser.id,
-      accountId: savedUser.accountId,
-      email: savedUser.email,
-      name: savedUser.name,
-      passwordHash: savedUser.passwordHash,
-      createdAt: savedUser.createdAt,
-      updatedAt: savedUser.updatedAt,
-    });
+    return this.toDomain(savedUser);
   }
 
   /**
@@ -68,7 +60,7 @@ export class PrismaUserRepository implements UserRepository {
     const record = await this.prisma.user.findFirst({
       where: {
         accountId: {
-          equals: accountId.toLowerCase(),
+          equals: accountId,
           mode: 'insensitive',
         },
       },
@@ -78,15 +70,7 @@ export class PrismaUserRepository implements UserRepository {
       return null;
     }
 
-    return User.reconstitute({
-      id: record.id,
-      accountId: record.accountId,
-      email: record.email,
-      name: record.name,
-      passwordHash: record.passwordHash,
-      createdAt: record.createdAt,
-      updatedAt: record.updatedAt,
-    });
+    return this.toDomain(record);
   }
 
   /**
@@ -99,7 +83,7 @@ export class PrismaUserRepository implements UserRepository {
     const record = await this.prisma.user.findFirst({
       where: {
         email: {
-          equals: email.toLowerCase(),
+          equals: email,
           mode: 'insensitive',
         },
       },
@@ -109,15 +93,7 @@ export class PrismaUserRepository implements UserRepository {
       return null;
     }
 
-    return User.reconstitute({
-      id: record.id,
-      accountId: record.accountId,
-      email: record.email,
-      name: record.name,
-      passwordHash: record.passwordHash,
-      createdAt: record.createdAt,
-      updatedAt: record.updatedAt,
-    });
+    return this.toDomain(record);
   }
 
   /**
@@ -134,6 +110,18 @@ export class PrismaUserRepository implements UserRepository {
       return null;
     }
 
+    return this.toDomain(record);
+  }
+
+  private toDomain(record: {
+    id: string;
+    accountId: string;
+    email: string;
+    name: string;
+    passwordHash: string;
+    createdAt: Date;
+    updatedAt: Date;
+  }): User {
     return User.reconstitute({
       id: record.id,
       accountId: record.accountId,
