@@ -12,9 +12,7 @@ import { UserRepository } from '../../application/ports/user.repository.interfac
  */
 @Injectable()
 export class PrismaUserRepository implements UserRepository {
-  constructor(
-    @Inject('PrismaClient') private readonly prisma: PrismaClient,
-  ) {}
+  constructor(@Inject('PrismaClient') private readonly prisma: PrismaClient) {}
 
   /**
    * User 엔티티 저장 (생성 또는 수정)
@@ -23,10 +21,13 @@ export class PrismaUserRepository implements UserRepository {
    */
   async save(user: User): Promise<User> {
     // 1. User 엔티티 → Prisma 모델 매핑
+    const accountId = user.getAccountId().getValue();
+    const email = user.getEmail().getValue();
+
     const data = {
       id: user.getId(),
-      accountId: user.getAccountId().getValue(),
-      email: user.getEmail().getValue(),
+      accountId,
+      email,
       name: user.getName(),
       passwordHash: user.getPasswordHash(),
       createdAt: user.getCreatedAt(),
@@ -38,11 +39,10 @@ export class PrismaUserRepository implements UserRepository {
       where: { id: user.getId() },
       create: data,
       update: {
-        accountId: data.accountId,
-        email: data.email,
+        accountId,
+        email,
         name: data.name,
         passwordHash: data.passwordHash,
-        updatedAt: data.updatedAt,
       },
     });
 
@@ -57,13 +57,10 @@ export class PrismaUserRepository implements UserRepository {
    * @returns User 엔티티 또는 null (미존재)
    */
   async findByAccountId(accountId: string): Promise<User | null> {
-    const record = await this.prisma.user.findFirst({
-      where: {
-        accountId: {
-          equals: accountId,
-          mode: 'insensitive',
-        },
-      },
+    const normalizedAccountId = accountId.toLowerCase();
+
+    const record = await this.prisma.user.findUnique({
+      where: { accountId: normalizedAccountId },
     });
 
     if (!record) {
@@ -80,13 +77,10 @@ export class PrismaUserRepository implements UserRepository {
    * @returns User 엔티티 또는 null (미존재)
    */
   async findByEmail(email: string): Promise<User | null> {
-    const record = await this.prisma.user.findFirst({
-      where: {
-        email: {
-          equals: email,
-          mode: 'insensitive',
-        },
-      },
+    const normalizedEmail = email.toLowerCase();
+
+    const record = await this.prisma.user.findUnique({
+      where: { email: normalizedEmail },
     });
 
     if (!record) {

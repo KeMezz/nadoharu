@@ -5,6 +5,7 @@ const config: Config = {
   rootDir: '.',
   testRegex: '.*\\.spec\\.ts$',
   testPathIgnorePatterns: ['\\.integration\\.spec\\.ts$'],
+  modulePathIgnorePatterns: ['<rootDir>/dist/'],
   transform: {
     '^.+\\.ts$': 'ts-jest',
   },
