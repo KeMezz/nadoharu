@@ -24,20 +24,11 @@ describe('Password Value Object', () => {
 
   describe('최소 길이 검증', () => {
     it('정책 위반 시 사용자 친화 메시지를 포함한다', () => {
-      try {
-        Password.create('aB1!cdefg');
-        throw new Error('expected Password.create to throw');
-      } catch (error) {
-        expect(error).toMatchObject({
+      expect(() => Password.create('aB1!cdefg')).toThrow(
+        expect.objectContaining({
           code: PasswordErrorCode.PASSWORD_TOO_SHORT,
           message: '비밀번호는 최소 10자 이상이어야 합니다.',
-        });
-      }
-    });
-
-    it('9자 비밀번호는 PASSWORD_TOO_SHORT 에러를 던진다', () => {
-      expect(() => Password.create('aB1!cdefg')).toThrow(
-        expect.objectContaining({ code: PasswordErrorCode.PASSWORD_TOO_SHORT }),
+        }),
       );
     });
 

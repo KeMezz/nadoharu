@@ -171,7 +171,9 @@ describe('RegisterUserUseCase', () => {
       // when & then
       await expect(useCase.execute(input)).rejects.toThrow(AccountIdError);
 
-      // 중복 확인은 수행하지만, VO 생성 시점에서 에러 발생
+      // VO 검증 실패 시 중복 확인은 수행하지 않음
+      expect(mockUserRepository.findByAccountId).not.toHaveBeenCalled();
+      expect(mockUserRepository.findByEmail).not.toHaveBeenCalled();
       expect(mockPasswordService.hash).not.toHaveBeenCalled();
       expect(mockUserRepository.save).not.toHaveBeenCalled();
     });
@@ -193,7 +195,9 @@ describe('RegisterUserUseCase', () => {
         expect.objectContaining({ code: EmailErrorCode.INVALID_EMAIL_FORMAT }),
       );
 
-      // 중복 확인은 수행하지만, VO 생성 시점에서 에러 발생
+      // VO 검증 실패 시 중복 확인은 수행하지 않음
+      expect(mockUserRepository.findByAccountId).not.toHaveBeenCalled();
+      expect(mockUserRepository.findByEmail).not.toHaveBeenCalled();
       expect(mockPasswordService.hash).not.toHaveBeenCalled();
       expect(mockUserRepository.save).not.toHaveBeenCalled();
     });
@@ -215,7 +219,9 @@ describe('RegisterUserUseCase', () => {
         expect.objectContaining({ code: PasswordErrorCode.PASSWORD_TOO_SHORT }),
       );
 
-      // 중복 확인은 수행하지만, Password VO 생성 시점에서 에러 발생
+      // VO 검증 실패 시 중복 확인은 수행하지 않음
+      expect(mockUserRepository.findByAccountId).not.toHaveBeenCalled();
+      expect(mockUserRepository.findByEmail).not.toHaveBeenCalled();
       expect(mockPasswordService.hash).not.toHaveBeenCalled();
       expect(mockUserRepository.save).not.toHaveBeenCalled();
     });
