@@ -45,7 +45,7 @@ export class RegisterUserUseCase {
     const password = Password.create(input.password).getValue();
     const accountId = AccountId.create(input.accountId).getValue();
     const email = Email.create(input.email).getValue();
-    // Name 검증은 User.create() 내부에서 수행
+    const name = User.validateName(input.name);
 
     // 2. 중복 확인 - accountId
     const existingUserByAccountId =
@@ -67,7 +67,7 @@ export class RegisterUserUseCase {
     const user = User.create({
       accountId,
       email,
-      name: input.name,
+      name,
       passwordHash,
     });
 

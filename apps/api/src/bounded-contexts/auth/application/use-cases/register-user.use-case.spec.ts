@@ -335,6 +335,12 @@ describe('RegisterUserUseCase', () => {
       await expect(useCase.execute(input)).rejects.toThrow(
         expect.objectContaining({ code: NameErrorCode.NAME_REQUIRED }),
       );
+
+      // name 검증 실패 시 중복 확인/해싱/저장을 수행하지 않음
+      expect(mockUserRepository.findByAccountId).not.toHaveBeenCalled();
+      expect(mockUserRepository.findByEmail).not.toHaveBeenCalled();
+      expect(mockPasswordService.hash).not.toHaveBeenCalled();
+      expect(mockUserRepository.save).not.toHaveBeenCalled();
     });
 
     it('name이 51자 이상이면 NAME_TOO_LONG 에러를 던져야 한다', async () => {
@@ -354,6 +360,12 @@ describe('RegisterUserUseCase', () => {
       await expect(useCase.execute(input)).rejects.toThrow(
         expect.objectContaining({ code: NameErrorCode.NAME_TOO_LONG }),
       );
+
+      // name 검증 실패 시 중복 확인/해싱/저장을 수행하지 않음
+      expect(mockUserRepository.findByAccountId).not.toHaveBeenCalled();
+      expect(mockUserRepository.findByEmail).not.toHaveBeenCalled();
+      expect(mockPasswordService.hash).not.toHaveBeenCalled();
+      expect(mockUserRepository.save).not.toHaveBeenCalled();
     });
   });
 });
