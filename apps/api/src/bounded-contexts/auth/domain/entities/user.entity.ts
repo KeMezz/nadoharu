@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
 import { AccountId } from '../value-objects/account-id.vo';
 import { Email } from '../value-objects/email.vo';
+import { NameError, NameErrorCode } from '../errors/name.error';
 
 interface CreateUserProps {
   accountId: string;
@@ -48,10 +49,16 @@ export class User {
     // 2. name 검증
     const trimmedName = props.name.trim();
     if (!trimmedName) {
-      throw new Error('NAME_REQUIRED');
+      throw new NameError(
+        NameErrorCode.NAME_REQUIRED,
+        '이름은 필수 입력 값입니다.',
+      );
     }
     if (trimmedName.length > 50) {
-      throw new Error('NAME_TOO_LONG');
+      throw new NameError(
+        NameErrorCode.NAME_TOO_LONG,
+        '이름은 50자 이하여야 합니다.',
+      );
     }
 
     // 3. 자동 생성 필드
@@ -84,10 +91,16 @@ export class User {
     // name 검증
     const trimmedName = props.name.trim();
     if (!trimmedName) {
-      throw new Error('NAME_REQUIRED');
+      throw new NameError(
+        NameErrorCode.NAME_REQUIRED,
+        '이름은 필수 입력 값입니다.',
+      );
     }
     if (trimmedName.length > 50) {
-      throw new Error('NAME_TOO_LONG');
+      throw new NameError(
+        NameErrorCode.NAME_TOO_LONG,
+        '이름은 50자 이하여야 합니다.',
+      );
     }
 
     return new User(

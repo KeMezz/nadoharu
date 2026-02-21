@@ -8,6 +8,7 @@ import {
   EmailAlreadyExistsError,
 } from '../../domain/errors/auth.error';
 import { EmailErrorCode } from '../../domain/errors/email.error';
+import { NameErrorCode } from '../../domain/errors/name.error';
 import { PasswordErrorCode } from '../../domain/errors/password.error';
 
 describe('RegisterUserUseCase', () => {
@@ -84,6 +85,37 @@ describe('RegisterUserUseCase', () => {
           getPasswordHash: expect.any(Function),
         }),
       );
+    });
+
+    it('email은 정규화된 값으로 중복 확인하고 저장해야 한다', async () => {
+      // given
+      const input = {
+        accountId: 'user_123',
+        email: '  Test@Example.com ',
+        name: '홍길동',
+        password: 'MyP@ssw0rd123',
+      };
+
+      mockUserRepository.findByAccountId.mockResolvedValue(null);
+      mockUserRepository.findByEmail.mockResolvedValue(null);
+      mockPasswordService.hash.mockResolvedValue('$2b$10$hashedpassword');
+
+      const savedUser = User.create({
+        accountId: input.accountId,
+        email: 'test@example.com',
+        name: input.name,
+        passwordHash: '$2b$10$hashedpassword',
+      });
+      mockUserRepository.save.mockResolvedValue(savedUser);
+
+      // when
+      const result = await useCase.execute(input);
+
+      // then
+      expect(mockUserRepository.findByEmail).toHaveBeenCalledWith(
+        'test@example.com',
+      );
+      expect(result.getEmail().getValue()).toBe('test@example.com');
     });
   });
 
@@ -300,7 +332,9 @@ describe('RegisterUserUseCase', () => {
       mockPasswordService.hash.mockResolvedValue('$2b$10$hashedpassword');
 
       // when & then
-      await expect(useCase.execute(input)).rejects.toThrow('NAME_REQUIRED');
+      await expect(useCase.execute(input)).rejects.toThrow(
+        expect.objectContaining({ code: NameErrorCode.NAME_REQUIRED }),
+      );
     });
 
     it('name이 51자 이상이면 NAME_TOO_LONG 에러를 던져야 한다', async () => {
@@ -317,7 +351,9 @@ describe('RegisterUserUseCase', () => {
       mockPasswordService.hash.mockResolvedValue('$2b$10$hashedpassword');
 
       // when & then
-      await expect(useCase.execute(input)).rejects.toThrow('NAME_TOO_LONG');
+      await expect(useCase.execute(input)).rejects.toThrow(
+        expect.objectContaining({ code: NameErrorCode.NAME_TOO_LONG }),
+      );
     });
   });
 });

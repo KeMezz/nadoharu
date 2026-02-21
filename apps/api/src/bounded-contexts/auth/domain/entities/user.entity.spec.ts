@@ -3,6 +3,7 @@ import { AccountId } from '../value-objects/account-id.vo';
 import { Email } from '../value-objects/email.vo';
 import { AccountIdError } from '../errors/account-id.error';
 import { EmailErrorCode } from '../errors/email.error';
+import { NameErrorCode } from '../errors/name.error';
 
 describe('User Entity', () => {
   describe('create() 팩토리 메서드', () => {
@@ -95,7 +96,9 @@ describe('User Entity', () => {
       };
 
       // when & then
-      expect(() => User.create(props)).toThrow('NAME_REQUIRED');
+      expect(() => User.create(props)).toThrow(
+        expect.objectContaining({ code: NameErrorCode.NAME_REQUIRED }),
+      );
     });
 
     it('name이 공백만 있으면 NAME_REQUIRED 에러를 던져야 한다', () => {
@@ -108,7 +111,9 @@ describe('User Entity', () => {
       };
 
       // when & then
-      expect(() => User.create(props)).toThrow('NAME_REQUIRED');
+      expect(() => User.create(props)).toThrow(
+        expect.objectContaining({ code: NameErrorCode.NAME_REQUIRED }),
+      );
     });
 
     it('name이 50자이면 통과해야 한다', () => {
@@ -136,7 +141,9 @@ describe('User Entity', () => {
       };
 
       // when & then
-      expect(() => User.create(props)).toThrow('NAME_TOO_LONG');
+      expect(() => User.create(props)).toThrow(
+        expect.objectContaining({ code: NameErrorCode.NAME_TOO_LONG }),
+      );
     });
   });
 
@@ -213,7 +220,9 @@ describe('User Entity', () => {
       };
 
       // when & then
-      expect(() => User.reconstitute(props)).toThrow('NAME_REQUIRED');
+      expect(() => User.reconstitute(props)).toThrow(
+        expect.objectContaining({ code: NameErrorCode.NAME_REQUIRED }),
+      );
     });
   });
 });
