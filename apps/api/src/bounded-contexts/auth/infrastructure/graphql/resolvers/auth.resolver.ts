@@ -1,3 +1,4 @@
+import { Inject } from '@nestjs/common';
 import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
 import { Request, Response } from 'express';
 import { RegisterUserUseCase } from '../../../application/use-cases/register-user.use-case';
@@ -14,8 +15,8 @@ import {
   LoginInput,
   UserType,
 } from '../types/auth.types';
+import { JwtConfig } from '../../jwt/jwt-config';
 import { LoginRateLimitService } from '../../security/login-rate-limit.service';
-import { parseDurationToMs } from '../../jwt/jwt-config';
 
 @Resolver()
 export class AuthResolver {
@@ -23,6 +24,7 @@ export class AuthResolver {
     private readonly registerUserUseCase: RegisterUserUseCase,
     private readonly authenticateUserUseCase: AuthenticateUserUseCase,
     private readonly loginRateLimitService: LoginRateLimitService,
+    @Inject('JwtConfig') private readonly jwtConfig: JwtConfig,
   ) {}
 
   @Mutation(() => UserType)
@@ -54,7 +56,7 @@ export class AuthResolver {
         secure: process.env.NODE_ENV === 'production',
         sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
         path: '/',
-        maxAge: parseDurationToMs(process.env.JWT_EXPIRES_IN?.trim() || '15m'),
+        maxAge: this.jwtConfig.expiresInMs,
       });
 
       return {

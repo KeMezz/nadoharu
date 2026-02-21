@@ -1,13 +1,19 @@
-import { ExecutionContext } from '@nestjs/common';
+import { ExecutionContext, Logger } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { GraphQLError } from 'graphql';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
 describe('JwtAuthGuard', () => {
   let guard: JwtAuthGuard;
+  let warnSpy: jest.SpiedFunction<Logger['warn']>;
 
   beforeEach(() => {
+    warnSpy = jest.spyOn(Logger.prototype, 'warn').mockImplementation();
     guard = new JwtAuthGuard();
+  });
+
+  afterEach(() => {
+    warnSpy.mockRestore();
   });
 
   describe('getRequest', () => {
@@ -36,6 +42,9 @@ describe('JwtAuthGuard', () => {
 
     it('사용자가 없으면 UNAUTHORIZED GraphQL 에러를 던진다', () => {
       expect(() => guard.handleRequest(null, null)).toThrow(GraphQLError);
+      expect(warnSpy).toHaveBeenCalledWith(
+        'JWT authentication failed: missing user',
+      );
 
       try {
         guard.handleRequest(null, null);
@@ -49,6 +58,9 @@ describe('JwtAuthGuard', () => {
     it('전달된 에러가 있으면 UNAUTHORIZED GraphQL 에러를 던진다', () => {
       expect(() => guard.handleRequest(new Error('jwt expired'), null)).toThrow(
         GraphQLError,
+      );
+      expect(warnSpy).toHaveBeenCalledWith(
+        'JWT authentication failed: jwt expired',
       );
     });
   });

@@ -8,6 +8,7 @@ import {
 import { AuthenticateUserUseCase } from '../../../application/use-cases/authenticate-user.use-case';
 import { RegisterUserUseCase } from '../../../application/use-cases/register-user.use-case';
 import { LoginRateLimitService } from '../../security/login-rate-limit.service';
+import { JwtConfig } from '../../jwt/jwt-config';
 import { AuthResolver } from './auth.resolver';
 
 describe('AuthResolver', () => {
@@ -15,6 +16,7 @@ describe('AuthResolver', () => {
   let registerUserUseCase: jest.Mocked<RegisterUserUseCase>;
   let authenticateUserUseCase: jest.Mocked<AuthenticateUserUseCase>;
   let loginRateLimitService: jest.Mocked<LoginRateLimitService>;
+  let jwtConfig: JwtConfig;
 
   const mockUser = User.reconstitute({
     id: '550e8400-e29b-41d4-a716-446655440000',
@@ -27,8 +29,12 @@ describe('AuthResolver', () => {
   });
 
   beforeEach(() => {
-    process.env.JWT_EXPIRES_IN = '15m';
     process.env.NODE_ENV = 'development';
+    jwtConfig = {
+      secret: '12345678901234567890123456789012',
+      expiresIn: '15m',
+      expiresInMs: 900000,
+    };
 
     registerUserUseCase = {
       execute: jest.fn(),
@@ -50,6 +56,7 @@ describe('AuthResolver', () => {
       registerUserUseCase,
       authenticateUserUseCase,
       loginRateLimitService,
+      jwtConfig,
     );
   });
 
@@ -156,6 +163,41 @@ describe('AuthResolver', () => {
       );
 
       expect(result.user.id).toBe(mockUser.getId());
+    });
+
+    it('쿠키 maxAge는 주입된 JwtConfig 값을 사용한다', async () => {
+      jwtConfig.expiresInMs = 120000;
+      process.env.JWT_EXPIRES_IN = '1h';
+
+      authenticateUserUseCase.execute.mockResolvedValue({
+        accessToken: 'jwt.token.value',
+        user: mockUser,
+      });
+
+      const request = {
+        ip: '127.0.0.1',
+        headers: {},
+      } as unknown as Request;
+      const response = {
+        cookie: jest.fn(),
+      } as unknown as Response;
+
+      await resolver.login(
+        {
+          accountId: 'testuser',
+          password: 'Password123!',
+        },
+        request,
+        response,
+      );
+
+      expect(response.cookie).toHaveBeenCalledWith(
+        'accessToken',
+        'jwt.token.value',
+        expect.objectContaining({
+          maxAge: 120000,
+        }),
+      );
     });
 
     it('x-forwarded-for 헤더가 있어도 request.ip를 우선 사용한다', async () => {

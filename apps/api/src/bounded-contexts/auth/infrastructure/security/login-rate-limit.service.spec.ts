@@ -73,4 +73,24 @@ describe('LoginRateLimitService', () => {
     const result = service.recordFailure('testuser', '127.0.0.1');
     expect(result.locked).toBe(false);
   });
+
+  it('오래된 엔트리는 주기적 정리 시 storage에서 제거된다', () => {
+    service.recordFailure('stale-user', '127.0.0.1');
+    const staleKey = service.createKey('stale-user', '127.0.0.1');
+
+    expect(
+      (service as unknown as { storage: Map<string, unknown> }).storage.has(
+        staleKey,
+      ),
+    ).toBe(true);
+
+    now += 6 * 60 * 1000;
+    service.recordFailure('fresh-user', '127.0.0.2');
+
+    expect(
+      (service as unknown as { storage: Map<string, unknown> }).storage.has(
+        staleKey,
+      ),
+    ).toBe(false);
+  });
 });
