@@ -1,5 +1,9 @@
 ---
-description: "NestJS DDD/Clean Architecture 기반 백엔드 코드 작성 지침을 제공합니다. bounded-context, 레이어드 아키텍처, 엔티티/VO/UseCase/Repository 패턴을 일관되게 적용합니다."
+name: nestjs-ddd
+description: 'NestJS DDD/Clean Architecture 기반 백엔드 코드 작성 지침을 제공합니다. bounded-context, 레이어드 아키텍처, 엔티티/VO/UseCase/Repository 패턴을 일관되게 적용합니다.'
+metadata:
+  author: nadoharu
+  version: '1.0'
 ---
 
 # NestJS DDD Architecture Guide
@@ -114,7 +118,7 @@ Domain ← Application ← Infrastructure
 
 ```typescript
 // room.entity.ts
-import type { RoomSetting } from './room-setting.entity'
+import type { RoomSetting } from './room-setting.entity';
 
 export class Room {
   // 상수는 static readonly로
@@ -122,42 +126,43 @@ export class Room {
     NONE: 0,
     DAY_TIME: 1,
     STAY: 2,
-  } as const
+  } as const;
 
   // 단순 프로퍼티는 readonly로 공개
-  readonly id: Props['id']
-  readonly name: Props['name']
-  readonly ownerId: Props['ownerId']
-  readonly roomSetting: Props['roomSetting']
+  readonly id: Props['id'];
+  readonly name: Props['name'];
+  readonly ownerId: Props['ownerId'];
+  readonly roomSetting: Props['roomSetting'];
 
   constructor(params: Props) {
-    this.id = params.id
-    this.name = params.name
-    this.ownerId = params.ownerId
-    this.roomSetting = params.roomSetting
+    this.id = params.id;
+    this.name = params.name;
+    this.ownerId = params.ownerId;
+    this.roomSetting = params.roomSetting;
   }
 
   // 비즈니스 로직은 메서드로
   isAvailable(): boolean {
-    if (this.deletedAt !== null) return false
-    return this.roomSetting.isRentalAvailable()
+    if (this.deletedAt !== null) return false;
+    return this.roomSetting.isRentalAvailable();
   }
 
   calculateTotalPrice(hours: number): number {
-    return this.price * hours
+    return this.price * hours;
   }
 }
 
 // Props 타입은 파일 하단에 정의
 type Props = {
-  id: number
-  name: string | null   // null 허용시 명시
-  ownerId: number
-  roomSetting: RoomSetting
-}
+  id: number;
+  name: string | null; // null 허용시 명시
+  ownerId: number;
+  roomSetting: RoomSetting;
+};
 ```
 
 **핵심 규칙**:
+
 - 계산 불필요한 프로퍼티: `readonly` 공개
 - 민감한 데이터: `readonly #` (hard private) + getter
 - 비즈니스 로직: 메서드로 구현
@@ -171,38 +176,39 @@ type Props = {
 ```typescript
 // password.vo.ts
 export class Password {
-  readonly #value: string
+  readonly #value: string;
 
   private constructor(value: string) {
-    this.#value = value
+    this.#value = value;
   }
 
   // 신규 생성 (바리데이션 포함)
   static create(password: string, passwordConfirmation: string): Password {
     if (!password) {
-      throw new Error('패스워드를 입력해 주세요.')
+      throw new Error('패스워드를 입력해 주세요.');
     }
     if (password.length < 8) {
-      throw new Error('패스워드는 8자 이상으로 입력해 주세요.')
+      throw new Error('패스워드는 8자 이상으로 입력해 주세요.');
     }
     if (password !== passwordConfirmation) {
-      throw new Error('패스워드가 일치하지 않습니다.')
+      throw new Error('패스워드가 일치하지 않습니다.');
     }
-    return new Password(password)
+    return new Password(password);
   }
 
   // DB에서 복원 (바리데이션 없음)
   static recreate(value: string): Password {
-    return new Password(value)
+    return new Password(value);
   }
 
   get value(): string {
-    return this.#value
+    return this.#value;
   }
 }
 ```
 
 **핵심 규칙**:
+
 - `readonly #` (hard private) + getter 패턴
 - private constructor + 정적 팩토리 메서드 (`create`, `recreate`)
 - `create()`: 신규 생성 (바리데이션 포함)
@@ -215,26 +221,29 @@ export class Password {
 
 ```typescript
 // owner-bank-account.zod.ts
-import { z } from 'zod'
+import { z } from 'zod';
 
 const Schema = z.strictObject({
   bankCode: z.preprocess(normalizeDigits, z.string().regex(/^\d{4}$/)),
   branchCode: z.preprocess(normalizeDigits, z.string().regex(/^\d{3}$/)),
   accountNumber: z.preprocess(normalizeDigits, z.string().regex(/^\d{7}$/)),
-})
+});
 
-export type OwnerBankAccountCleaned = z.infer<typeof Schema>
+export type OwnerBankAccountCleaned = z.infer<typeof Schema>;
 
-export const cleanOwnerBankAccount = (params: unknown): OwnerBankAccountCleaned => {
-  const r = Schema.safeParse(params)
+export const cleanOwnerBankAccount = (
+  params: unknown,
+): OwnerBankAccountCleaned => {
+  const r = Schema.safeParse(params);
   if (!r.success) {
-    throw new Error(r.error.issues.map((i) => i.message).join('\n'))
+    throw new Error(r.error.issues.map((i) => i.message).join('\n'));
   }
-  return r.data
-}
+  return r.data;
+};
 ```
 
 **판단 기준**:
+
 - 단순 바리데이션 (길이, 범위 등): `if`문
 - 복잡한 바리데이션 (상호 검증, 데이터 정규화): Zod 스키마
 
@@ -252,34 +261,33 @@ export const cleanOwnerBankAccount = (params: unknown): OwnerBankAccountCleaned 
 
 ```typescript
 // room-get.usecase.ts
-import { Inject, Injectable } from '@nestjs/common'
-import { RoomRepository } from '../room.repository'
-import type { RoomGetInput } from './room-get.input'
-import type { RoomGetOutput } from './room-get.output'
+import { Inject, Injectable } from '@nestjs/common';
+import { RoomRepository } from '../room.repository';
+import type { RoomGetInput } from './room-get.input';
+import type { RoomGetOutput } from './room-get.output';
 
 @Injectable()
 export class RoomGetUseCase {
-  readonly #roomRepository: RoomRepository
+  readonly #roomRepository: RoomRepository;
 
-  constructor(
-    @Inject(RoomRepository) roomRepository: RoomRepository,
-  ) {
-    this.#roomRepository = roomRepository
+  constructor(@Inject(RoomRepository) roomRepository: RoomRepository) {
+    this.#roomRepository = roomRepository;
   }
 
   async handle(input: RoomGetInput): Promise<RoomGetOutput | null> {
-    const room = await this.#roomRepository.findById({ id: input.id })
-    if (!room) return null
+    const room = await this.#roomRepository.findById({ id: input.id });
+    if (!room) return null;
 
     return {
       id: room.id,
       name: room.name,
-    }
+    };
   }
 }
 ```
 
 **핵심 규칙**:
+
 - 모든 UseCase는 `handle` 메서드로 통일
 - DI 의존은 `readonly #` (hard private)
 - `@Inject()` 데코레이터로 인터페이스 토큰 지정
@@ -293,27 +301,28 @@ export class RoomGetUseCase {
 ```typescript
 @Injectable()
 export class UserCreateUseCase {
-  readonly #unitOfWorkFactory: UnitOfWorkFactory
-  readonly #userRepository: UserRepository
+  readonly #unitOfWorkFactory: UnitOfWorkFactory;
+  readonly #userRepository: UserRepository;
 
   constructor(
     @Inject(UnitOfWorkFactory) unitOfWorkFactory: UnitOfWorkFactory,
     @Inject(UserRepository) userRepository: UserRepository,
   ) {
-    this.#unitOfWorkFactory = unitOfWorkFactory
-    this.#userRepository = userRepository
+    this.#unitOfWorkFactory = unitOfWorkFactory;
+    this.#userRepository = userRepository;
   }
 
   async handle(input: Input): Promise<Output> {
     return await this.#unitOfWorkFactory.get('main').run(async () => {
       // 이 안의 처리는 모두 동일 트랜잭션 내에서 실행
-      return await this.#userRepository.save(entity)
-    })
+      return await this.#userRepository.save(entity);
+    });
   }
 }
 ```
 
 **핵심 규칙**:
+
 - `UnitOfWorkFactory.get('main' | 'search' | 'log')` 으로 DB별 UoW 취득
 - `unitOfWork.run()` 안의 처리가 동일 트랜잭션
 - bounded-context를 넘어 트랜잭션을 걸지 않음
@@ -324,22 +333,23 @@ export class UserCreateUseCase {
 
 ```typescript
 // room.repository.ts
-import type { Pagination } from '@/shared-kernel/domain/value-objects'
-import type { Room } from '../../domain/entities/room/room.entity'
+import type { Pagination } from '@/shared-kernel/domain/value-objects';
+import type { Room } from '../../domain/entities/room/room.entity';
 
 export interface RoomRepository {
-  findById(args: { id: number } | { uid: string }): Promise<Room | null>
-  findByIds(args: { ids: number[]; withDeleted: boolean }): Promise<Room[]>
-  findAll(args: { ownerId: number; pagination: Pagination }): Promise<Room[]>
-  save(room: Room): Promise<void>
-  saveAll(rooms: Room[]): Promise<void>
+  findById(args: { id: number } | { uid: string }): Promise<Room | null>;
+  findByIds(args: { ids: number[]; withDeleted: boolean }): Promise<Room[]>;
+  findAll(args: { ownerId: number; pagination: Pagination }): Promise<Room[]>;
+  save(room: Room): Promise<void>;
+  saveAll(rooms: Room[]): Promise<void>;
 }
 
 // DI 토큰 (CamelCase = 'SCREAMING_SNAKE')
-export const RoomRepository = 'ROOM_REPOSITORY'
+export const RoomRepository = 'ROOM_REPOSITORY';
 ```
 
 **핵심 규칙**:
+
 - 인터페이스는 application 층에 배치
 - DI 토큰: `export const Xxx = 'XXX_YYY'` 형식
 - 등록/수정은 `save` / `saveAll`로 통일 (create/update 분리하지 않음)
@@ -350,27 +360,27 @@ export const RoomRepository = 'ROOM_REPOSITORY'
 
 ```typescript
 // UseCase에서 App*Error 사용
-import { AppBadRequestError } from '@/shared-kernel/application/errors/app-bad-request.error'
-import { AppNotFoundError } from '@/shared-kernel/application/errors/app-not-found.error'
-import { AppForbiddenError } from '@/shared-kernel/application/errors/app-forbidden.error'
+import { AppBadRequestError } from '@/shared-kernel/application/errors/app-bad-request.error';
+import { AppNotFoundError } from '@/shared-kernel/application/errors/app-not-found.error';
+import { AppForbiddenError } from '@/shared-kernel/application/errors/app-forbidden.error';
 
 // 도메인 객체의 바리데이션 에러를 캐치
 const entity = (() => {
   try {
-    return new SomeEntity(input)
+    return new SomeEntity(input);
   } catch (error) {
-    throw new AppBadRequestError((error as Error).message)
+    throw new AppBadRequestError((error as Error).message);
   }
-})()
+})();
 
 // 존재 확인
 if (!entity) {
-  throw new AppNotFoundError('대상을 찾을 수 없습니다')
+  throw new AppNotFoundError('대상을 찾을 수 없습니다');
 }
 
 // 권한 확인
 if (entity.ownerId !== currentUserId) {
-  throw new AppForbiddenError()
+  throw new AppForbiddenError();
 }
 ```
 
@@ -397,25 +407,25 @@ this.logger.error('Failed to create room', { error: error.message })
 
 ```typescript
 // prisma-room.repository.ts
-import { Injectable } from '@nestjs/common'
-import { PrismaMainUnitOfWork } from '@/shared-kernel/infrastructure/gateways/prisma/transaction/prisma-main.unit-of-work'
-import type { RoomRepository } from '@/bounded-contexts/asset/application/room/room.repository'
-import { buildRoomEntity } from './room.builder'
+import { Injectable } from '@nestjs/common';
+import { PrismaMainUnitOfWork } from '@/shared-kernel/infrastructure/gateways/prisma/transaction/prisma-main.unit-of-work';
+import type { RoomRepository } from '@/bounded-contexts/asset/application/room/room.repository';
+import { buildRoomEntity } from './room.builder';
 
 @Injectable()
 export class PrismaRoomRepository implements RoomRepository {
-  readonly #unitOfWork: PrismaMainUnitOfWork
+  readonly #unitOfWork: PrismaMainUnitOfWork;
 
   constructor(unitOfWork: PrismaMainUnitOfWork) {
-    this.#unitOfWork = unitOfWork
+    this.#unitOfWork = unitOfWork;
   }
 
   async findById(args: { id: number }): Promise<Room | null> {
     const result = await this.#unitOfWork.client.rooms.findFirst({
       where: { ...args, deletedAt: null },
       include: { roomSettings: { where: { deletedAt: null } } },
-    })
-    return result ? buildRoomEntity(result, result.roomSettings[0]) : null
+    });
+    return result ? buildRoomEntity(result, result.roomSettings[0]) : null;
   }
 
   async save(room: Room): Promise<void> {
@@ -423,12 +433,13 @@ export class PrismaRoomRepository implements RoomRepository {
       where: { id: room.id },
       update: { name: room.name },
       create: { id: room.id, name: room.name },
-    })
+    });
   }
 }
 ```
 
 **핵심 규칙**:
+
 - `#unitOfWork.client`로 트랜잭션 클라이언트 취득
 - Builder 패턴으로 Prisma 결과 → Entity 변환
 - 논리 삭제: `deletedAt: null` 명시
@@ -441,20 +452,24 @@ export class PrismaRoomRepository implements RoomRepository {
 
 ```typescript
 // room.builder.ts
-import { Room } from '@/bounded-contexts/asset/domain/entities/room/room.entity'
-import type { Rooms, RoomSettings } from 'prisma/generated/main'
+import { Room } from '@/bounded-contexts/asset/domain/entities/room/room.entity';
+import type { Rooms, RoomSettings } from 'prisma/generated/main';
 
-export const buildRoomEntity = (room: Rooms, roomSetting: RoomSettings): Room => {
+export const buildRoomEntity = (
+  room: Rooms,
+  roomSetting: RoomSettings,
+): Room => {
   return new Room({
     id: room.id,
     name: room.name,
     ownerId: room.ownerId ?? 0,
     roomSetting: buildRoomSettingEntity(roomSetting),
-  })
-}
+  });
+};
 ```
 
 **핵심 규칙**:
+
 - 순수 함수 (클래스 아님)
 - Prisma 타입 → Domain Entity 매핑
 - 기본값은 `??` 연산자로
@@ -465,26 +480,26 @@ export const buildRoomEntity = (room: Rooms, roomSetting: RoomSettings): Room =>
 
 ```typescript
 // room.controller.ts
-import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common'
-import { RoomListUseCase } from '@/bounded-contexts/asset/application/room/list/room-list.usecase'
-import { RoomPresenter } from './room.presenter'
+import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
+import { RoomListUseCase } from '@/bounded-contexts/asset/application/room/list/room-list.usecase';
+import { RoomPresenter } from './room.presenter';
 
 @Controller('/1/rooms')
 export class RoomController {
-  readonly #roomListUseCase: RoomListUseCase
-  readonly #roomPresenter: RoomPresenter
+  readonly #roomListUseCase: RoomListUseCase;
+  readonly #roomPresenter: RoomPresenter;
 
   constructor(roomListUseCase: RoomListUseCase, i18nService: I18nService) {
-    this.#roomListUseCase = roomListUseCase
-    this.#roomPresenter = new RoomPresenter(i18nService)
+    this.#roomListUseCase = roomListUseCase;
+    this.#roomPresenter = new RoomPresenter(i18nService);
   }
 
   @Get()
   async findAll(@Query('page') page?: string): Promise<RoomResponse> {
     const result = await this.#roomListUseCase.handle({
       page: page == null ? 1 : Number(page),
-    })
-    return this.#roomPresenter.toResponse(result)
+    });
+    return this.#roomPresenter.toResponse(result);
   }
 }
 ```
@@ -496,10 +511,10 @@ export class RoomController {
 ```typescript
 // room.presenter.ts
 export class RoomPresenter {
-  readonly #i18nService: I18nService
+  readonly #i18nService: I18nService;
 
   constructor(i18nService: I18nService) {
-    this.#i18nService = i18nService
+    this.#i18nService = i18nService;
   }
 
   toResponse(output: RoomListOutput): RoomResponse {
@@ -508,15 +523,18 @@ export class RoomPresenter {
         id: room.id,
         name: room.name ?? '',
         // i18n 변환은 Presenter 책임
-        state_text: this.#i18nService.translate(`master.large_area.${room.state}`),
+        state_text: this.#i18nService.translate(
+          `master.large_area.${room.state}`,
+        ),
       })),
       totalCount: output.totalCount,
-    }
+    };
   }
 }
 ```
 
 **핵심 규칙**:
+
 - 표시 로직은 Presenter에서 (Entity에 넣지 않음)
 - i18n 변환은 Presenter 책임
 - Entity는 코드값 보유, Presenter에서 일본어화
@@ -527,7 +545,7 @@ export class RoomPresenter {
 
 ```typescript
 // room.module.ts
-import { Module, forwardRef } from '@nestjs/common'
+import { Module, forwardRef } from '@nestjs/common';
 
 @Module({
   imports: [PrismaModule, forwardRef(() => RelatedModule)],
@@ -542,14 +560,15 @@ import { Module, forwardRef } from '@nestjs/common'
     RoomResolver,
   ],
   exports: [
-    RoomGetUseCase,    // 다른 context에서 사용 가능
-    RoomRepository,    // 인터페이스 공개
+    RoomGetUseCase, // 다른 context에서 사용 가능
+    RoomRepository, // 인터페이스 공개
   ],
 })
 export class RoomModule {}
 ```
 
 **핵심 규칙**:
+
 - `{ provide: InterfaceToken, useClass: Implementation }` 패턴
 - 순환 의존은 `forwardRef()` 사용
 - exports에는 공개 UseCase와 Repository 인터페이스만
@@ -559,30 +578,30 @@ export class RoomModule {}
 **파일명**: `<command-name>.cli.ts`
 
 ```typescript
-import { Command, CommandRunner, Option } from 'nest-commander'
-import { WinstonLogger } from '@/common/logger/winston-logger.service'
+import { Command, CommandRunner, Option } from 'nest-commander';
+import { WinstonLogger } from '@/common/logger/winston-logger.service';
 
 @Command({
-  name: '<context>:<command-name>',  // 예: config:sync-data
+  name: '<context>:<command-name>', // 예: config:sync-data
   description: '커맨드 설명',
 })
 export class SyncDataCli extends CommandRunner {
-  readonly #logger: WinstonLogger
+  readonly #logger: WinstonLogger;
 
   constructor(logger: WinstonLogger) {
-    super()
-    this.#logger = logger
-    this.#logger.setContext(SyncDataCli.name)
+    super();
+    this.#logger = logger;
+    this.#logger.setContext(SyncDataCli.name);
   }
 
   async run(_passedParam: string[], options?: Options): Promise<void> {
-    this.#logger.log('Sync started')
+    this.#logger.log('Sync started');
     // 처리 로직
   }
 
   @Option({ flags: '-d, --dry-run', description: 'Dry run mode' })
   parseDryRun(val: string): boolean {
-    return val === 'true'
+    return val === 'true';
   }
 }
 ```
@@ -595,10 +614,10 @@ export class SyncDataCli extends CommandRunner {
 
 ```typescript
 describe('RoomGetUseCase', () => {
-  let moduleRef: TestingModule
-  let useCase: RoomGetUseCase
+  let moduleRef: TestingModule;
+  let useCase: RoomGetUseCase;
 
-  const mockFindById: jest.Mock = jest.fn()
+  const mockFindById: jest.Mock = jest.fn();
 
   beforeEach(async () => {
     moduleRef = await Test.createTestingModule({
@@ -617,31 +636,31 @@ describe('RoomGetUseCase', () => {
           },
         },
       ],
-    }).compile()
+    }).compile();
 
-    await moduleRef.init()
-    useCase = moduleRef.get(RoomGetUseCase)
-  })
+    await moduleRef.init();
+    useCase = moduleRef.get(RoomGetUseCase);
+  });
 
   afterEach(() => {
-    jest.clearAllMocks()
-    moduleRef.close()
-  })
+    jest.clearAllMocks();
+    moduleRef.close();
+  });
 
   describe('handle', () => {
     it('Room이 존재하는 경우, Output을 반환할 것', async () => {
-      mockFindById.mockResolvedValue(RoomEntityFactory.build())
-      const result = await useCase.handle({ id: 1 })
-      expect(result).toMatchObject({ id: 1 })
-    })
+      mockFindById.mockResolvedValue(RoomEntityFactory.build());
+      const result = await useCase.handle({ id: 1 });
+      expect(result).toMatchObject({ id: 1 });
+    });
 
     it('Room이 존재하지 않는 경우, null을 반환할 것', async () => {
-      mockFindById.mockResolvedValue(null)
-      const result = await useCase.handle({ id: 999 })
-      expect(result).toBeNull()
-    })
-  })
-})
+      mockFindById.mockResolvedValue(null);
+      const result = await useCase.handle({ id: 999 });
+      expect(result).toBeNull();
+    });
+  });
+});
 ```
 
 ### 5.2 Entity/VO 단체 테스트 (`.spec.ts`)
@@ -650,51 +669,51 @@ describe('RoomGetUseCase', () => {
 describe('Password', () => {
   describe('create', () => {
     it('유효한 패스워드인 경우, 생성할 수 있을 것', () => {
-      const password = Password.create('password123', 'password123')
-      expect(password.value).toBe('password123')
-    })
+      const password = Password.create('password123', 'password123');
+      expect(password.value).toBe('password123');
+    });
 
     it('8자 미만인 경우, 에러가 발생할 것', () => {
-      expect(() => Password.create('short', 'short')).toThrow('8자 이상')
-    })
-  })
-})
+      expect(() => Password.create('short', 'short')).toThrow('8자 이상');
+    });
+  });
+});
 ```
 
 ### 5.3 통합 테스트 (`.integration.spec.ts`)
 
 ```typescript
 describe('GET /1/rooms (integration)', () => {
-  let app: NestFastifyApplication
+  let app: NestFastifyApplication;
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
       imports: [TestAppModule],
-    }).compile()
+    }).compile();
 
     app = moduleRef.createNestApplication<NestFastifyApplication>(
       new FastifyAdapter(),
-    )
-    await app.init()
-    await app.getHttpAdapter().getInstance().ready()
-  })
+    );
+    await app.init();
+    await app.getHttpAdapter().getInstance().ready();
+  });
 
   afterAll(async () => {
-    await app.close()
-  })
+    await app.close();
+  });
 
   it('Room 일람을 취득할 수 있을 것', async () => {
-    const response = await request(app.getHttpServer())
-      .get('/1/rooms?owner_id=test')
-    expect(response.status).toBe(200)
-  })
+    const response = await request(app.getHttpServer()).get(
+      '/1/rooms?owner_id=test',
+    );
+    expect(response.status).toBe(200);
+  });
 
   it('미인증의 경우, 401을 반환할 것', async () => {
-    const response = await request(app.getHttpServer())
-      .get('/1/rooms')
-    expect(response.status).toBe(401)
-  })
-})
+    const response = await request(app.getHttpServer()).get('/1/rooms');
+    expect(response.status).toBe(401);
+  });
+});
 ```
 
 ### 5.4 Mock Factory (fishery)
@@ -702,8 +721,8 @@ describe('GET /1/rooms (integration)', () => {
 **파일명**: `__mocks__/<resource>.entity.factory.ts`
 
 ```typescript
-import { Factory } from 'fishery'
-import { Room } from '../room.entity'
+import { Factory } from 'fishery';
+import { Room } from '../room.entity';
 
 export const RoomEntityFactory = Factory.define<Room>(({ sequence }) => {
   return new Room({
@@ -711,19 +730,19 @@ export const RoomEntityFactory = Factory.define<Room>(({ sequence }) => {
     name: `Room ${sequence}`,
     ownerId: sequence,
     roomSetting: RoomSettingEntityFactory.build({ roomId: sequence }),
-  })
-})
+  });
+});
 ```
 
 ### 5.5 테스트 방침
 
-| 대상 | 방식 | 파일 |
-|------|------|------|
-| Domain (entity/vo) | Mock 불필요 (순수 로직) | `*.spec.ts` |
-| UseCase | 외부 의존은 Mock | `*.spec.ts` |
-| Repository | DB 결합 테스트 | `*.spec.ts` |
-| Controller/Resolver | 해피패스는 DB 결합 | `*.integration.spec.ts` |
-| Controller/Resolver | 세부 분기는 Mock | `*.spec.ts` |
+| 대상                | 방식                    | 파일                    |
+| ------------------- | ----------------------- | ----------------------- |
+| Domain (entity/vo)  | Mock 불필요 (순수 로직) | `*.spec.ts`             |
+| UseCase             | 외부 의존은 Mock        | `*.spec.ts`             |
+| Repository          | DB 결합 테스트          | `*.spec.ts`             |
+| Controller/Resolver | 해피패스는 DB 결합      | `*.integration.spec.ts` |
+| Controller/Resolver | 세부 분기는 Mock        | `*.spec.ts`             |
 
 ---
 
@@ -740,30 +759,36 @@ export const RoomEntityFactory = Factory.define<Room>(({ sequence }) => {
 
 ### 6.2 네이밍 규칙
 
-| 항목 | 규칙 | 예시 |
-|------|------|------|
-| 파일 | kebab-case | `room-get.usecase.ts` |
-| Entity | PascalCase | `Room`, `RoomSetting` |
-| ValueObject | PascalCase + `.vo.ts` | `Email`, `Password` |
-| UseCase | PascalCase + UseCase | `RoomGetUseCase` |
-| Repository | PascalCase + Repository | `RoomRepository` |
-| DI 토큰 | `SCREAMING_SNAKE` | `'ROOM_REPOSITORY'` |
-| Builder | `build<Entity>Entity` | `buildRoomEntity()` |
-| Presenter | PascalCase + Presenter | `RoomPresenter` |
-| CLI | PascalCase + Cli | `HelloCli` |
-| Module | PascalCase + Module | `RoomModule` |
-| 테스트 이름 | 일본어(또는 한국어) | `it('Room이 존재하는 경우...')` |
+| 항목        | 규칙                    | 예시                            |
+| ----------- | ----------------------- | ------------------------------- |
+| 파일        | kebab-case              | `room-get.usecase.ts`           |
+| Entity      | PascalCase              | `Room`, `RoomSetting`           |
+| ValueObject | PascalCase + `.vo.ts`   | `Email`, `Password`             |
+| UseCase     | PascalCase + UseCase    | `RoomGetUseCase`                |
+| Repository  | PascalCase + Repository | `RoomRepository`                |
+| DI 토큰     | `SCREAMING_SNAKE`       | `'ROOM_REPOSITORY'`             |
+| Builder     | `build<Entity>Entity`   | `buildRoomEntity()`             |
+| Presenter   | PascalCase + Presenter  | `RoomPresenter`                 |
+| CLI         | PascalCase + Cli        | `HelloCli`                      |
+| Module      | PascalCase + Module     | `RoomModule`                    |
+| 테스트 이름 | 일본어(또는 한국어)     | `it('Room이 존재하는 경우...')` |
 
 ### 6.3 함수 인자
 
 ```typescript
 // 인자가 복수인 경우 object 형식
-function calculatePrice({ basePrice, discount }: { basePrice: number; discount: number }) {
-  return basePrice * (1 - discount)
+function calculatePrice({
+  basePrice,
+  discount,
+}: {
+  basePrice: number;
+  discount: number;
+}) {
+  return basePrice * (1 - discount);
 }
 
 // boolean은 명시적 지정
-const user = await this.userRepository.findById(id, { includeDeleted: false })
+const user = await this.userRepository.findById(id, { includeDeleted: false });
 ```
 
 ### 6.4 환경 변수
