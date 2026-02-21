@@ -1,4 +1,4 @@
-const INVALID_EMAIL_FORMAT = 'INVALID_EMAIL_FORMAT';
+import { EmailError, EmailErrorCode } from '../errors/email.error';
 
 /**
  * Email Value Object
@@ -37,7 +37,10 @@ export class Email {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!value || !emailRegex.test(value)) {
-      throw new Error(INVALID_EMAIL_FORMAT);
+      throw new EmailError(
+        EmailErrorCode.INVALID_EMAIL_FORMAT,
+        '이메일 형식이 올바르지 않습니다.',
+      );
     }
   }
 

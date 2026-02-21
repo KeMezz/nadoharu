@@ -312,22 +312,46 @@ describe('AuthResolver (Integration)', () => {
     });
 
     it.each([
-      { password: 'Short1!a', code: 'PASSWORD_TOO_SHORT' },
-      { password: `${'a'.repeat(71)}1!`, code: 'PASSWORD_TOO_LONG' },
-      { password: 'PASSWORD123!', code: 'PASSWORD_MISSING_LOWERCASE' },
-      { password: 'passwordonly!', code: 'PASSWORD_MISSING_NUMBER' },
-      { password: 'password1234', code: 'PASSWORD_MISSING_SPECIAL_CHAR' },
-    ])('16.7 비밀번호 정책 위반 시 $code 반환', async ({ password, code }) => {
-      const result = await executeGraphql<CreateUserPayload>({
-        query: CREATE_USER_MUTATION,
-        variables: {
-          input: createUserInput({ password }),
-        },
-      });
+      {
+        password: 'Short1!a',
+        code: 'PASSWORD_TOO_SHORT',
+        message: '비밀번호는 최소 10자 이상이어야 합니다.',
+      },
+      {
+        password: `${'a'.repeat(71)}1!`,
+        code: 'PASSWORD_TOO_LONG',
+        message: '비밀번호는 최대 72자 이하여야 합니다.',
+      },
+      {
+        password: 'PASSWORD123!',
+        code: 'PASSWORD_MISSING_LOWERCASE',
+        message: '비밀번호는 영문 소문자를 포함해야 합니다.',
+      },
+      {
+        password: 'passwordonly!',
+        code: 'PASSWORD_MISSING_NUMBER',
+        message: '비밀번호는 숫자를 포함해야 합니다.',
+      },
+      {
+        password: 'password1234',
+        code: 'PASSWORD_MISSING_SPECIAL_CHAR',
+        message: '비밀번호는 특수문자를 포함해야 합니다.',
+      },
+    ])(
+      '16.7 비밀번호 정책 위반 시 $code 반환',
+      async ({ password, code, message }) => {
+        const result = await executeGraphql<CreateUserPayload>({
+          query: CREATE_USER_MUTATION,
+          variables: {
+            input: createUserInput({ password }),
+          },
+        });
 
-      expect(result.status).toBe(200);
-      expectGraphqlError(result.body, code);
-    });
+        expect(result.status).toBe(200);
+        const error = expectGraphqlError(result.body, code);
+        expect(error.message).toContain(message);
+      },
+    );
 
     it('16.8 저장된 비밀번호는 원본과 다른 hash로 저장된다', async () => {
       const input = createUserInput({ password: 'password1!a' });

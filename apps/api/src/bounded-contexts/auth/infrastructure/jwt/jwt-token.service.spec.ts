@@ -73,6 +73,23 @@ describe('JwtTokenService', () => {
     expect(() => service.verify(hs512Token)).toThrow(UnauthorizedError);
   });
 
+  it('다른 비밀키로 서명된 HS256 토큰을 거부한다', () => {
+    const anotherJwtService = new JwtService({
+      secret: 'another-jwt-secret-key-with-at-least-32',
+      signOptions: {
+        algorithm: 'HS256',
+        expiresIn: '15m',
+      },
+    });
+
+    const token = anotherJwtService.sign({
+      sub: 'user-id-1',
+      accountId: 'user_1',
+    });
+
+    expect(() => service.verify(token)).toThrow(UnauthorizedError);
+  });
+
   it('sub가 문자열이 아니면 거부한다', () => {
     const token = jwtService.sign({
       sub: 123,
