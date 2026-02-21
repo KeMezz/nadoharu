@@ -41,12 +41,15 @@ export class LoginRateLimitService {
     }
 
     if (entry.lockedUntil <= now) {
-      entry.lockedUntil = null;
+      const unlockedEntry = {
+        failureTimestamps: [...entry.failureTimestamps],
+        lockedUntil: null,
+      };
 
-      if (entry.failureTimestamps.length === 0) {
+      if (unlockedEntry.failureTimestamps.length === 0) {
         this.store.delete(key);
       } else {
-        this.store.set(key, entry);
+        this.store.set(key, unlockedEntry);
       }
 
       return false;
@@ -60,24 +63,28 @@ export class LoginRateLimitService {
     this.cleanup(now);
 
     const key = this.createKey(accountId, ip);
-    const entry = this.store.get(key) ?? {
+    const existingEntry = this.store.get(key) ?? {
       failureTimestamps: [],
       lockedUntil: null,
     };
 
-    entry.failureTimestamps = entry.failureTimestamps.filter(
+    const recentFailures = existingEntry.failureTimestamps.filter(
       (timestamp) => now - timestamp <= LoginRateLimitService.WINDOW_MS,
     );
-    entry.failureTimestamps.push(now);
+    const nextFailureTimestamps = [...recentFailures, now];
 
-    if (entry.failureTimestamps.length >= LoginRateLimitService.MAX_FAILURES) {
-      entry.lockedUntil = now + LoginRateLimitService.LOCK_DURATION_MS;
-      entry.failureTimestamps = [];
-      this.store.set(key, entry);
+    if (nextFailureTimestamps.length >= LoginRateLimitService.MAX_FAILURES) {
+      this.store.set(key, {
+        failureTimestamps: [],
+        lockedUntil: now + LoginRateLimitService.LOCK_DURATION_MS,
+      });
       return { locked: true };
     }
 
-    this.store.set(key, entry);
+    this.store.set(key, {
+      failureTimestamps: nextFailureTimestamps,
+      lockedUntil: existingEntry.lockedUntil,
+    });
     return { locked: false };
   }
 
@@ -92,20 +99,23 @@ export class LoginRateLimitService {
     }
 
     for (const [key, entry] of this.store.entries()) {
-      entry.failureTimestamps = entry.failureTimestamps.filter(
+      const failureTimestamps = entry.failureTimestamps.filter(
         (timestamp) => now - timestamp <= LoginRateLimitService.WINDOW_MS,
       );
+      const lockedUntil =
+        entry.lockedUntil !== null && entry.lockedUntil <= now
+          ? null
+          : entry.lockedUntil;
 
-      if (entry.lockedUntil !== null && entry.lockedUntil <= now) {
-        entry.lockedUntil = null;
-      }
-
-      if (entry.lockedUntil === null && entry.failureTimestamps.length === 0) {
+      if (lockedUntil === null && failureTimestamps.length === 0) {
         this.store.delete(key);
         continue;
       }
 
-      this.store.set(key, entry);
+      this.store.set(key, {
+        failureTimestamps,
+        lockedUntil,
+      });
     }
 
     this.lastCleanupAt = now;

@@ -453,7 +453,7 @@ describe('AuthResolver', () => {
       });
     });
 
-    it('인증 정보가 없으면 UNAUTHORIZED 에러를 반환한다', async () => {
+    it('가드 없이 직접 호출했을 때 인증 정보가 없으면 UNAUTHORIZED 에러를 반환한다', async () => {
       await expect(resolver.me(undefined)).rejects.toMatchObject({
         message: 'UNAUTHORIZED',
         extensions: { code: 'UNAUTHORIZED' },
