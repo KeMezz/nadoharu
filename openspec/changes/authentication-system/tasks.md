@@ -117,56 +117,56 @@
 
 ## 16. Integration Tests - 회원가입
 
-- [ ] 16.1 회원가입 성공 시나리오 테스트 (createUser Mutation E2E)
-- [ ] 16.2 중복 accountId 에러 테스트
-- [ ] 16.3 중복 email 에러 테스트
-- [ ] 16.4 accountId 형식 위반 테스트 (3자 미만, 20자 초과, 허용되지 않은 문자)
-- [ ] 16.5 email 형식 위반 테스트 (잘못된 형식, 공백 포함)
-- [ ] 16.6 name 길이 위반 테스트 (빈 이름, 50자 초과)
-- [ ] 16.7 비밀번호 정책 위반 테스트 (10자 미만, 72자 초과, 복잡도 부족)
-- [ ] 16.8 비밀번호 해싱 확인 (저장된 값이 원본과 다름)
-- [ ] 16.9 응답에 password 필드 제외 확인
+- [x] 16.1 회원가입 성공 시나리오 테스트 (createUser Mutation E2E)
+- [x] 16.2 중복 accountId 에러 테스트
+- [x] 16.3 중복 email 에러 테스트
+- [x] 16.4 accountId 형식 위반 테스트 (3자 미만, 20자 초과, 허용되지 않은 문자)
+- [x] 16.5 email 형식 위반 테스트 (잘못된 형식, 공백 포함)
+- [x] 16.6 name 길이 위반 테스트 (빈 이름, 50자 초과)
+- [x] 16.7 비밀번호 정책 위반 테스트 (10자 미만, 72자 초과, 복잡도 부족)
+- [x] 16.8 비밀번호 해싱 확인 (저장된 값이 원본과 다름)
+- [x] 16.9 응답에 password 필드 제외 확인
 
 ## 17. Integration Tests - 로그인
 
-- [ ] 17.1 로그인 성공 시나리오 테스트 (login Mutation E2E)
-- [ ] 17.2 httpOnly 쿠키 설정 확인 (Set-Cookie 헤더)
-- [ ] 17.3 쿠키 속성 확인 (name=accessToken, path=/, httpOnly, secure, sameSite)
-- [ ] 17.4 응답에 accessToken 본문 제외 확인
-- [ ] 17.5 존재하지 않는 accountId 에러 테스트
-- [ ] 17.6 잘못된 비밀번호 에러 테스트
-- [ ] 17.7 에러 메시지 동일성 확인 (계정/비밀번호 구분 불가)
-- [ ] 17.8 Rate limiting 테스트 (10회 실패 시 잠금)
-- [ ] 17.9 잠금 해제 후 로그인 허용 테스트
-- [ ] 17.10 로그인 성공 시 카운터 초기화 테스트
+- [x] 17.1 로그인 성공 시나리오 테스트 (login Mutation E2E)
+- [x] 17.2 httpOnly 쿠키 설정 확인 (Set-Cookie 헤더)
+- [x] 17.3 쿠키 속성 확인 (name=accessToken, path=/, httpOnly, secure, sameSite)
+- [x] 17.4 응답에 accessToken 본문 제외 확인
+- [x] 17.5 존재하지 않는 accountId 에러 테스트
+- [x] 17.6 잘못된 비밀번호 에러 테스트
+- [x] 17.7 에러 메시지 동일성 확인 (계정/비밀번호 구분 불가)
+- [x] 17.8 Rate limiting 테스트 (10회 실패 시 잠금)
+- [x] 17.9 잠금 해제 후 로그인 허용 테스트
+- [x] 17.10 로그인 성공 시 카운터 초기화 테스트
 
 ## 18. Integration Tests - 인증 가드
 
-- [ ] 18.1 보호된 Resolver에 유효한 토큰으로 접근 테스트
-- [ ] 18.2 보호된 Resolver에 토큰 없이 접근 시 UNAUTHORIZED 에러 테스트
-- [ ] 18.3 만료된 토큰으로 접근 시 UNAUTHORIZED 에러 테스트
-- [ ] 18.4 Authorization 헤더 토큰 추출 테스트
-- [ ] 18.5 쿠키 토큰 추출 테스트
-- [ ] 18.6 헤더/쿠키 동시 존재 시 헤더 우선 테스트
-- [ ] 18.7 @CurrentUser 데코레이터로 사용자 정보 접근 테스트
-- [ ] 18.8 공개 엔드포인트(createUser, login) 인증 불필요 확인
+- [x] 18.1 보호된 Resolver에 유효한 토큰으로 접근 테스트
+- [x] 18.2 보호된 Resolver에 토큰 없이 접근 시 UNAUTHORIZED 에러 테스트
+- [x] 18.3 만료된 토큰으로 접근 시 UNAUTHORIZED 에러 테스트
+- [x] 18.4 Authorization 헤더 토큰 추출 테스트
+- [x] 18.5 쿠키 토큰 추출 테스트
+- [x] 18.6 헤더/쿠키 동시 존재 시 헤더 우선 테스트
+- [x] 18.7 @CurrentUser 데코레이터로 사용자 정보 접근 테스트
+- [x] 18.8 공개 엔드포인트(createUser, login) 인증 불필요 확인
 
 ## 19. GraphQL 에러 형식 통일
 
-- [ ] 19.1 모든 비즈니스 에러를 HTTP 200 + errors[].extensions.code 형식으로 반환
-- [ ] 19.2 에러 코드 enum 정의 (ACCOUNT_ID_ALREADY_EXISTS, INVALID_CREDENTIALS 등)
-- [ ] 19.3 GlobalExceptionFilter 또는 GraphQL formatError 설정
-- [ ] 19.4 각 에러 타입별 extensions.code 매핑
+- [x] 19.1 모든 비즈니스 에러를 HTTP 200 + errors[].extensions.code 형식으로 반환
+- [x] 19.2 에러 코드 enum 정의 (ACCOUNT_ID_ALREADY_EXISTS, INVALID_CREDENTIALS 등)
+- [x] 19.3 GlobalExceptionFilter 또는 GraphQL formatError 설정
+- [x] 19.4 각 에러 타입별 extensions.code 매핑
 
 ## 20. 테스트 커버리지 검증
 
-- [ ] 20.1 Jest 커버리지 리포트 생성 (80%+ 확인)
-- [ ] 20.2 미커버 영역 식별 및 테스트 추가
-- [ ] 20.3 모든 테스트 통과 확인
+- [x] 20.1 Jest 커버리지 리포트 생성 (80%+ 확인)
+- [x] 20.2 미커버 영역 식별 및 테스트 추가
+- [x] 20.3 모든 테스트 통과 확인
 
 ## 21. 문서화
 
-- [ ] 21.1 API 문서 업데이트 (GraphQL schema, Mutation 설명)
-- [ ] 21.2 환경 변수 문서 업데이트 (JWT_SECRET, JWT_EXPIRES_IN)
-- [ ] 21.3 CLAUDE.md 업데이트 (새 bounded-context, 인증 가드 사용법)
-- [ ] 21.4 README.md 업데이트 (인증 시스템 섹션 추가)
+- [x] 21.1 API 문서 업데이트 (GraphQL schema, Mutation 설명)
+- [x] 21.2 환경 변수 문서 업데이트 (JWT_SECRET, JWT_EXPIRES_IN)
+- [x] 21.3 CLAUDE.md 업데이트 (새 bounded-context, 인증 가드 사용법)
+- [x] 21.4 README.md 업데이트 (인증 시스템 섹션 추가)
