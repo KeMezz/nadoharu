@@ -87,6 +87,7 @@ chore: 프로젝트 초기 설정
 ### CLAUDE.md 갱신
 
 작업 완료 후 이 문서에 영향을 주는 변경이 있으면 **반드시 CLAUDE.md를 업데이트**한다:
+
 - 새 명령어, 스크립트가 추가된 경우
 - 아키텍처 구조가 변경된 경우
 - 새 필수 규칙이나 컨벤션이 도입된 경우
@@ -97,6 +98,12 @@ chore: 프로젝트 초기 설정
 - `/nestjs-ddd` — 백엔드 코드 작성 시 필수
 - `/branch-and-commit` — 브랜치 생성 + Conventional Commit
 - `/create-pr` — PR 템플릿 기반 PR 생성
+
+### OpenCode 커맨드
+
+- OpenSpec 공식 OpenCode 커맨드는 `.opencode/command/opsx-*.md` 기준으로 사용
+- 커스텀 커맨드는 `.opencode/command/`에 유지 (`/branch-and-commit`, `/create-pr`)
+- OpenCode에서는 커스텀 워크플로우를 skill보다 command 우선으로 관리
 
 ## 아키텍처
 
@@ -129,12 +136,14 @@ src/
 ### 로컬 개발 환경 설정
 
 1. **환경 변수 설정**
+
    ```bash
    cp .env.example .env
    # .env 파일을 열어 필요한 값 수정
    ```
 
 2. **데이터베이스 시작**
+
    ```bash
    docker compose up -d
    ```
@@ -154,6 +163,7 @@ src/
 ### 데이터베이스 연결
 
 기본 연결 정보 (`.env.example` 참고):
+
 ```
 DATABASE_URL="postgresql://nadoharu:nadoharu_dev@localhost:5432/nadoharu"
 ```
