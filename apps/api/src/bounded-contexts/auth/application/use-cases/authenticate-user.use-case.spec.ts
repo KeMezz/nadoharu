@@ -1,15 +1,15 @@
-import { JwtService } from '@nestjs/jwt';
 import { User } from '../../domain/entities/user.entity';
 import { PasswordService } from '../../domain/services/password.service';
 import { UserRepository } from '../ports/user.repository.interface';
 import { AuthenticateUserUseCase } from './authenticate-user.use-case';
 import { InvalidCredentialsError } from '../../domain/errors/auth.error';
+import { TokenService } from '../ports/token-service.interface';
 
 describe('AuthenticateUserUseCase', () => {
   let useCase: AuthenticateUserUseCase;
   let userRepository: jest.Mocked<UserRepository>;
   let passwordService: jest.Mocked<PasswordService>;
-  let jwtService: jest.Mocked<JwtService>;
+  let tokenService: jest.Mocked<TokenService>;
 
   beforeEach(() => {
     userRepository = {
@@ -22,16 +22,17 @@ describe('AuthenticateUserUseCase', () => {
     passwordService = {
       hash: jest.fn(),
       compare: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<PasswordService>;
 
-    jwtService = {
+    tokenService = {
       sign: jest.fn(),
-    } as any;
+      verify: jest.fn(),
+    } as unknown as jest.Mocked<TokenService>;
 
     useCase = new AuthenticateUserUseCase(
       userRepository,
       passwordService,
-      jwtService,
+      tokenService,
     );
   });
 
@@ -54,19 +55,19 @@ describe('AuthenticateUserUseCase', () => {
 
       userRepository.findByAccountId.mockResolvedValue(mockUser);
       passwordService.compare.mockResolvedValue(true);
-      jwtService.sign.mockReturnValue(expectedToken);
+      tokenService.sign.mockReturnValue(expectedToken);
 
       // When
       const result = await useCase.execute({ accountId, password });
 
       // Then
-      expect(result).toEqual({ accessToken: expectedToken });
+      expect(result).toEqual({ accessToken: expectedToken, user: mockUser });
       expect(userRepository.findByAccountId).toHaveBeenCalledWith(accountId);
       expect(passwordService.compare).toHaveBeenCalledWith(
         password,
         mockUser.getPasswordHash(),
       );
-      expect(jwtService.sign).toHaveBeenCalledWith({
+      expect(tokenService.sign).toHaveBeenCalledWith({
         sub: mockUser.getId(),
         accountId: mockUser.getAccountId().getValue(),
       });
@@ -85,7 +86,7 @@ describe('AuthenticateUserUseCase', () => {
       );
       expect(userRepository.findByAccountId).toHaveBeenCalledWith(accountId);
       expect(passwordService.compare).not.toHaveBeenCalled();
-      expect(jwtService.sign).not.toHaveBeenCalled();
+      expect(tokenService.sign).not.toHaveBeenCalled();
     });
 
     it('잘못된 비밀번호로 인증 시 INVALID_CREDENTIALS 에러를 발생시킨다', async () => {
@@ -105,7 +106,7 @@ describe('AuthenticateUserUseCase', () => {
         password,
         mockUser.getPasswordHash(),
       );
-      expect(jwtService.sign).not.toHaveBeenCalled();
+      expect(tokenService.sign).not.toHaveBeenCalled();
     });
 
     it('계정 존재 여부와 비밀번호 오류 시 동일한 에러 메시지를 반환한다', async () => {

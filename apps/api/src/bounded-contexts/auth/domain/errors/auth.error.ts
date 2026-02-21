@@ -37,3 +37,23 @@ export class InvalidCredentialsError extends Error {
     this.name = 'InvalidCredentialsError';
   }
 }
+
+/**
+ * 로그인 시도 제한 초과
+ */
+export class AccountTemporarilyLockedError extends Error {
+  constructor() {
+    super('ACCOUNT_TEMPORARILY_LOCKED');
+    this.name = 'AccountTemporarilyLockedError';
+  }
+}
+
+/**
+ * 인증 실패
+ */
+export class UnauthorizedError extends Error {
+  constructor() {
+    super('UNAUTHORIZED');
+    this.name = 'UnauthorizedError';
+  }
+}

@@ -59,61 +59,61 @@
 
 ## 9. Infrastructure Layer - JWT Module
 
-- [ ] 9.1 JwtModule 설정 (JWT_SECRET, JWT_EXPIRES_IN, HS256 알고리즘)
-- [ ] 9.2 JWT_SECRET 최소 32자 검증 로직 추가
-- [ ] 9.3 JWT_SECRET 미설정 시 시작 실패 처리
-- [ ] 9.4 JwtService 래퍼 구현 (sign, verify)
-- [ ] 9.5 JwtService 단위 테스트 (토큰 발급, 검증, 만료, none 알고리즘 거부)
+- [x] 9.1 JwtModule 설정 (JWT_SECRET, JWT_EXPIRES_IN, HS256 알고리즘)
+- [x] 9.2 JWT_SECRET 최소 32자 검증 로직 추가
+- [x] 9.3 JWT_SECRET 미설정 시 시작 실패 처리
+- [x] 9.4 JwtService 래퍼 구현 (sign, verify)
+- [x] 9.5 JwtService 단위 테스트 (토큰 발급, 검증, 만료, none 알고리즘 거부)
 
 ## 10. Infrastructure Layer - Passport JWT Strategy
 
-- [ ] 10.1 JwtStrategy 구현 (PassportStrategy 상속)
-- [ ] 10.2 JwtStrategy에서 헤더/쿠키 토큰 추출 (헤더 우선)
-- [ ] 10.3 JwtStrategy.validate() 구현 (페이로드 → 사용자 정보 반환)
-- [ ] 10.4 JwtStrategy 단위 테스트 (유효 토큰, 만료 토큰, 잘못된 서명)
+- [x] 10.1 JwtStrategy 구현 (PassportStrategy 상속)
+- [x] 10.2 JwtStrategy에서 헤더/쿠키 토큰 추출 (헤더 우선)
+- [x] 10.3 JwtStrategy.validate() 구현 (페이로드 → 사용자 정보 반환)
+- [x] 10.4 JwtStrategy 단위 테스트 (유효 토큰, 만료 토큰, 잘못된 서명)
 
 ## 11. Infrastructure Layer - Auth Guard
 
-- [ ] 11.1 JwtAuthGuard 구현 (CanActivate 인터페이스)
-- [ ] 11.2 JwtAuthGuard에서 GqlExecutionContext 사용
-- [ ] 11.3 @CurrentUser 데코레이터 구현 (JWT 페이로드 추출)
-- [ ] 11.4 JwtAuthGuard 단위 테스트 (인증 성공, 토큰 없음, 만료 토큰)
+- [x] 11.1 JwtAuthGuard 구현 (CanActivate 인터페이스)
+- [x] 11.2 JwtAuthGuard에서 GqlExecutionContext 사용
+- [x] 11.3 @CurrentUser 데코레이터 구현 (JWT 페이로드 추출)
+- [x] 11.4 JwtAuthGuard 단위 테스트 (인증 성공, 토큰 없음, 만료 토큰)
 
 ## 12. Infrastructure Layer - Rate Limiting
 
-- [ ] 12.1 Rate limiting 서비스 구현 (in-memory 또는 Redis)
-- [ ] 12.2 accountId+IP 키 생성 로직 구현
-- [ ] 12.3 5분 내 10회 실패 시 10분 잠금 로직
-- [ ] 12.4 로그인 성공 시 카운터 초기화 로직
-- [ ] 12.5 Rate limiting 서비스 단위 테스트 (정상, 잠금, 해제, 초기화)
+- [x] 12.1 Rate limiting 서비스 구현 (in-memory 또는 Redis)
+- [x] 12.2 accountId+IP 키 생성 로직 구현
+- [x] 12.3 5분 내 10회 실패 시 10분 잠금 로직
+- [x] 12.4 로그인 성공 시 카운터 초기화 로직
+- [x] 12.5 Rate limiting 서비스 단위 테스트 (정상, 잠금, 해제, 초기화)
 
 ## 13. Infrastructure Layer - GraphQL Types
 
-- [ ] 13.1 User GraphQL ObjectType 정의 (id, accountId, email, name, createdAt)
-- [ ] 13.2 CreateUserInput InputType 정의 (accountId, password, email, name)
-- [ ] 13.3 LoginInput InputType 정의 (accountId, password)
-- [ ] 13.4 AuthPayload ObjectType 정의 (user)
+- [x] 13.1 User GraphQL ObjectType 정의 (id, accountId, email, name, createdAt)
+- [x] 13.2 CreateUserInput InputType 정의 (accountId, password, email, name)
+- [x] 13.3 LoginInput InputType 정의 (accountId, password)
+- [x] 13.4 AuthPayload ObjectType 정의 (user)
 
 ## 14. Infrastructure Layer - GraphQL Resolver
 
-- [ ] 14.1 AuthResolver 구현 (Resolver 데코레이터)
-- [ ] 14.2 createUser Mutation 구현 (RegisterUserUseCase 호출)
-- [ ] 14.3 createUser에 GraphQL 에러 처리 추가 (extensions.code)
-- [ ] 14.4 login Mutation 구현 (AuthenticateUserUseCase 호출)
-- [ ] 14.5 login에 httpOnly 쿠키 설정 (accessToken, path=/, host-only)
-- [ ] 14.6 login에 환경별 쿠키 속성 설정 (secure, sameSite)
-- [ ] 14.7 login에 Rate limiting 적용
-- [ ] 14.8 login에 GraphQL 에러 처리 추가 (extensions.code)
+- [x] 14.1 AuthResolver 구현 (Resolver 데코레이터)
+- [x] 14.2 createUser Mutation 구현 (RegisterUserUseCase 호출)
+- [x] 14.3 createUser에 GraphQL 에러 처리 추가 (extensions.code)
+- [x] 14.4 login Mutation 구현 (AuthenticateUserUseCase 호출)
+- [x] 14.5 login에 httpOnly 쿠키 설정 (accessToken, path=/, host-only)
+- [x] 14.6 login에 환경별 쿠키 속성 설정 (secure, sameSite)
+- [x] 14.7 login에 Rate limiting 적용
+- [x] 14.8 login에 GraphQL 에러 처리 추가 (extensions.code)
 
 ## 15. Module 구성 및 의존성 주입
 
-- [ ] 15.1 AuthModule 생성
-- [ ] 15.2 PassportModule, JwtModule 임포트
-- [ ] 15.3 JwtStrategy Provider 등록
-- [ ] 15.4 UseCases Provider 등록
-- [ ] 15.5 PrismaUserRepository Provider 등록 (UserRepository 토큰)
-- [ ] 15.6 AuthResolver Provider 등록
-- [ ] 15.7 AppModule에 AuthModule 임포트
+- [x] 15.1 AuthModule 생성
+- [x] 15.2 PassportModule, JwtModule 임포트
+- [x] 15.3 JwtStrategy Provider 등록
+- [x] 15.4 UseCases Provider 등록
+- [x] 15.5 PrismaUserRepository Provider 등록 (UserRepository 토큰)
+- [x] 15.6 AuthResolver Provider 등록
+- [x] 15.7 AppModule에 AuthModule 임포트
 
 ## 16. Integration Tests - 회원가입
 

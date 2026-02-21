@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { Inject, Injectable } from '@nestjs/common';
 import { PasswordService } from '../../domain/services/password.service';
 import { UserRepository } from '../ports/user.repository.interface';
 import { InvalidCredentialsError } from '../../domain/errors/auth.error';
+import { TokenService } from '../ports/token-service.interface';
+import { User } from '../../domain/entities/user.entity';
 
 interface AuthenticateUserInput {
   accountId: string;
@@ -11,6 +12,7 @@ interface AuthenticateUserInput {
 
 interface AuthenticateUserOutput {
   accessToken: string;
+  user: User;
 }
 
 /**
@@ -26,14 +28,14 @@ interface AuthenticateUserOutput {
 @Injectable()
 export class AuthenticateUserUseCase {
   constructor(
+    @Inject('UserRepository')
     private readonly userRepository: UserRepository,
     private readonly passwordService: PasswordService,
-    private readonly jwtService: JwtService,
+    @Inject('TokenService')
+    private readonly tokenService: TokenService,
   ) {}
 
-  async execute(
-    input: AuthenticateUserInput,
-  ): Promise<AuthenticateUserOutput> {
+  async execute(input: AuthenticateUserInput): Promise<AuthenticateUserOutput> {
     const { accountId, password } = input;
 
     // 1. accountId로 사용자 조회
@@ -56,8 +58,8 @@ export class AuthenticateUserUseCase {
       sub: user.getId(),
       accountId: user.getAccountId().getValue(),
     };
-    const accessToken = this.jwtService.sign(payload);
+    const accessToken = this.tokenService.sign(payload);
 
-    return { accessToken };
+    return { accessToken, user };
   }
 }

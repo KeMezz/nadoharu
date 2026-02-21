@@ -98,11 +98,12 @@ chore: 프로젝트 초기 설정
 - `/nestjs-ddd` — 백엔드 코드 작성 시 필수
 - `/branch-and-commit` — 브랜치 생성 + Conventional Commit
 - `/create-pr` — PR 템플릿 기반 PR 생성
+- `/resolve-claude-review` — Claude PR 코멘트 타당성 검증 + 수정/반론 + @claude 결과 댓글
 
 ### OpenCode 커맨드
 
 - OpenSpec 공식 OpenCode 커맨드는 `.opencode/command/opsx-*.md` 기준으로 사용
-- 커스텀 커맨드는 `.opencode/command/`에 유지 (`/branch-and-commit`, `/create-pr`)
+- 커스텀 커맨드는 `.opencode/command/`에 유지 (`/branch-and-commit`, `/create-pr`, `/resolve-claude-review`)
 - OpenCode에서는 커스텀 워크플로우를 skill보다 command 우선으로 관리
 
 ## 아키텍처
