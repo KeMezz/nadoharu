@@ -162,7 +162,6 @@ describe('LoginRateLimitService', () => {
 
   it('잠금 만료 시 실패 이력이 없으면 엔트리를 삭제한다', () => {
     // 이전 테스트와 동일하게 cleanup 기준 시각을 명시적으로 설정한다.
-    // cleanup 간격(60초)을 넘기기 위한 warmup 호출로 정리 로직 실행 조건을 만든다.
     service.recordFailure('warmup-user', '127.0.0.9');
 
     const key = service.createKey('expired-user', '127.0.0.8');
@@ -182,6 +181,7 @@ describe('LoginRateLimitService', () => {
       lockedUntil: now + 2 * 60 * 1000,
     });
 
+    // cleanup 간격(60초)을 넘기기 위한 warmup 호출로 정리 로직 실행 조건을 만든다.
     service.recordFailure('warmup-user', '127.0.0.9');
 
     now += 61 * 1000;
