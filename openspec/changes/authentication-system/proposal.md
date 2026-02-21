@@ -15,6 +15,7 @@
 - **Prisma 스키마**: User 모델 정의
 
 **범위 제외**:
+
 - 소셜 로그인 (Apple, Kakao, GitHub) → 별도 change로 진행
 - 비밀번호 재설정/찾기 → 추후 구현
 - 이메일 인증 → 추후 구현
@@ -36,19 +37,23 @@
 ## Impact
 
 **백엔드 (apps/api)**:
+
 - 새 bounded-context: `user` 또는 `auth` (DDD 구조에 따라 결정)
 - Prisma schema: User 모델 추가
 - 의존성: `@nestjs/passport`, `@nestjs/jwt`, `passport-jwt`, `bcrypt`
-- GraphQL schema: Query `login`, Mutation `createUser`
+- GraphQL schema: Mutation `createUser`, `login`
 - 환경 변수: `JWT_SECRET`, `JWT_EXPIRES_IN`
 
 **프론트엔드 (apps/web)**:
+
 - 현재 변경 없음 (이미 레거시 프론트엔드 존재)
 - 추후 Next.js 재작성 시 참고
 
 **데이터베이스**:
+
 - PostgreSQL User 테이블 생성 (Prisma migration)
 
 **테스트**:
+
 - Unit: Entity, VO, UseCase (비밀번호 정책, JWT 발급 로직)
 - Integration: Resolver, Repository (회원가입/로그인 E2E)

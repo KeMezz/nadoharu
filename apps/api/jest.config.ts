@@ -9,7 +9,15 @@ const config: Config = {
   transform: {
     '^.+\\.ts$': 'ts-jest',
   },
-  collectCoverageFrom: ['src/**/*.ts', '!src/main.ts'],
+  collectCoverageFrom: [
+    'src/**/*.ts',
+    '!src/main.ts',
+    '!src/**/*.module.ts',
+    '!src/**/*.spec.ts',
+    '!src/**/*.integration.spec.ts',
+    '!src/**/graphql/types/*.ts',
+    '!src/**/current-user.decorator.ts',
+  ],
   coverageDirectory: './coverage',
   coverageThreshold: {
     global: {

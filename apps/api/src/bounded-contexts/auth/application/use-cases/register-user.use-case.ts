@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { UserRepository } from '../ports/user.repository.interface';
 import { PasswordService } from '../../domain/services/password.service';
 import { User } from '../../domain/entities/user.entity';
@@ -35,6 +35,7 @@ export interface RegisterUserInput {
 @Injectable()
 export class RegisterUserUseCase {
   constructor(
+    @Inject('UserRepository')
     private readonly userRepository: UserRepository,
     private readonly passwordService: PasswordService,
   ) {}
