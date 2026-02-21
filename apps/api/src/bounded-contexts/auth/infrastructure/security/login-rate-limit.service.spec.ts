@@ -141,4 +141,55 @@ describe('LoginRateLimitService', () => {
 
     expect(service.isLocked('testuser', '127.0.0.1')).toBe(false);
   });
+
+  it('잠금 만료 시 실패 이력이 남아있으면 잠금만 해제하고 엔트리를 유지한다', () => {
+    // cleanup 트리거 간격(60초)을 넘기기 위해 사전 호출로 기준 시각을 초기화한다.
+    service.recordFailure('warmup-user', '127.0.0.9');
+
+    const key = service.createKey('testuser', '127.0.0.1');
+    store.set(key, {
+      failureTimestamps: [now - 1000],
+      lockedUntil: now - 1,
+    });
+
+    expect(service.isLocked('testuser', '127.0.0.1')).toBe(false);
+
+    const entry = store.get(key);
+    expect(entry).toBeDefined();
+    expect(entry?.lockedUntil).toBeNull();
+    expect(entry?.failureTimestamps).toEqual([now - 1000]);
+  });
+
+  it('잠금 만료 시 실패 이력이 없으면 엔트리를 삭제한다', () => {
+    // 이전 테스트와 동일하게 cleanup 기준 시각을 명시적으로 설정한다.
+    service.recordFailure('warmup-user', '127.0.0.9');
+
+    const key = service.createKey('expired-user', '127.0.0.8');
+    store.set(key, {
+      failureTimestamps: [],
+      lockedUntil: now - 1,
+    });
+
+    expect(service.isLocked('expired-user', '127.0.0.8')).toBe(false);
+    expect(store.get(key)).toBeUndefined();
+  });
+
+  it('cleanup 시 유효한 엔트리는 필터링 후 유지한다', () => {
+    const key = service.createKey('keep-user', '127.0.0.3');
+    store.set(key, {
+      failureTimestamps: [now - 10 * 60 * 1000, now - 1000],
+      lockedUntil: now + 2 * 60 * 1000,
+    });
+
+    // cleanup 간격(60초)을 넘기기 위한 warmup 호출로 정리 로직 실행 조건을 만든다.
+    service.recordFailure('warmup-user', '127.0.0.9');
+
+    now += 61 * 1000;
+    service.recordFailure('trigger-cleanup', '127.0.0.4');
+
+    const entry = store.get(key);
+    expect(entry).toBeDefined();
+    expect(entry?.failureTimestamps).toHaveLength(1);
+    expect(entry?.lockedUntil).toBeGreaterThan(now);
+  });
 });

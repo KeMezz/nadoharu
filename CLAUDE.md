@@ -33,6 +33,7 @@ pnpm --filter web dev           # 프론트엔드만 실행 (http://localhost:30
 pnpm --filter api test          # 백엔드 테스트만
 pnpm --filter api test:watch    # 백엔드 테스트 watch 모드
 pnpm --filter api test:cov      # 백엔드 테스트 커버리지
+pnpm --filter api test:integration # 백엔드 통합 테스트
 pnpm --filter web test          # 프론트엔드 테스트만
 pnpm --filter web test:watch    # 프론트엔드 테스트 watch 모드
 
@@ -120,6 +121,15 @@ src/
 ├── common/              # 횡단 관심사 (middleware, guard, filter, logger)
 └── auth/                # 인증/인가 (guards, decorators, policies)
 ```
+
+### 인증 bounded-context 사용 가이드
+
+- 위치: `apps/api/src/bounded-contexts/auth`
+- 공개 GraphQL Mutation: `createUser`, `login`
+- 보호된 GraphQL Query: `me`
+- 보호 Resolver는 `@UseGuards(JwtAuthGuard)`로 적용
+- 현재 사용자 정보는 `@CurrentUser` 데코레이터로 접근
+- JWT 추출 우선순위: `Authorization` 헤더 > `accessToken` 쿠키
 
 ### 개발 워크플로우 (OpenSpec)
 

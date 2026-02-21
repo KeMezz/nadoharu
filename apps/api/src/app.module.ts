@@ -3,6 +3,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { Request, Response } from 'express';
 import { AuthModule } from './bounded-contexts/auth/infrastructure/auth.module';
+import { formatGraphQLError } from './common/graphql/format-graphql-error';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { AuthModule } from './bounded-contexts/auth/infrastructure/auth.module';
         req,
         res,
       }),
+      formatError: formatGraphQLError,
     }),
     AuthModule,
   ],

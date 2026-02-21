@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@apollo/server": "^5.4.0",
+    "@as-integrations/express5": "^1.1.2",
     "@nadoharu/shared": "workspace:*",
     "@nestjs/apollo": "^13.2.4",
     "@nestjs/common": "^11.0.0",
