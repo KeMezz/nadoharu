@@ -6,6 +6,7 @@ import {
   InvalidCredentialsError,
 } from '../../../domain/errors/auth.error';
 import { AuthenticateUserUseCase } from '../../../application/use-cases/authenticate-user.use-case';
+import { GetCurrentUserUseCase } from '../../../application/use-cases/get-current-user.use-case';
 import { RegisterUserUseCase } from '../../../application/use-cases/register-user.use-case';
 import { LoginRateLimitService } from '../../security/login-rate-limit.service';
 import { JwtConfig } from '../../jwt/jwt-config';
@@ -15,6 +16,7 @@ describe('AuthResolver', () => {
   let resolver: AuthResolver;
   let registerUserUseCase: jest.Mocked<RegisterUserUseCase>;
   let authenticateUserUseCase: jest.Mocked<AuthenticateUserUseCase>;
+  let getCurrentUserUseCase: jest.Mocked<GetCurrentUserUseCase>;
   let loginRateLimitService: jest.Mocked<LoginRateLimitService>;
   let jwtConfig: JwtConfig;
 
@@ -44,6 +46,10 @@ describe('AuthResolver', () => {
       execute: jest.fn(),
     } as unknown as jest.Mocked<AuthenticateUserUseCase>;
 
+    getCurrentUserUseCase = {
+      execute: jest.fn(),
+    } as unknown as jest.Mocked<GetCurrentUserUseCase>;
+
     loginRateLimitService = {
       createKey: jest.fn(),
       assertNotLocked: jest.fn(),
@@ -55,6 +61,7 @@ describe('AuthResolver', () => {
     resolver = new AuthResolver(
       registerUserUseCase,
       authenticateUserUseCase,
+      getCurrentUserUseCase,
       loginRateLimitService,
       jwtConfig,
     );
@@ -421,6 +428,35 @@ describe('AuthResolver', () => {
       ).rejects.toMatchObject({
         message: 'ACCOUNT_TEMPORARILY_LOCKED',
         extensions: { code: 'ACCOUNT_TEMPORARILY_LOCKED' },
+      });
+    });
+  });
+
+  describe('me', () => {
+    it('인증된 사용자 정보로 현재 사용자 정보를 반환한다', async () => {
+      getCurrentUserUseCase.execute.mockResolvedValue(mockUser);
+
+      const result = await resolver.me({
+        id: mockUser.getId(),
+        accountId: mockUser.getAccountId().getValue(),
+      });
+
+      expect(getCurrentUserUseCase.execute).toHaveBeenCalledWith({
+        userId: mockUser.getId(),
+      });
+      expect(result).toEqual({
+        id: mockUser.getId(),
+        accountId: mockUser.getAccountId().getValue(),
+        email: mockUser.getEmail().getValue(),
+        name: mockUser.getName(),
+        createdAt: mockUser.getCreatedAt(),
+      });
+    });
+
+    it('인증 정보가 없으면 UNAUTHORIZED 에러를 반환한다', async () => {
+      await expect(resolver.me(undefined)).rejects.toMatchObject({
+        message: 'UNAUTHORIZED',
+        extensions: { code: 'UNAUTHORIZED' },
       });
     });
   });

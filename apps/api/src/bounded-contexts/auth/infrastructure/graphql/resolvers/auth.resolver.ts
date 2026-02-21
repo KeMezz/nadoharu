@@ -1,11 +1,13 @@
-import { Inject } from '@nestjs/common';
-import { Args, Context, Mutation, Resolver } from '@nestjs/graphql';
+import { Inject, UseGuards } from '@nestjs/common';
+import { Args, Context, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { Request, Response } from 'express';
 import { RegisterUserUseCase } from '../../../application/use-cases/register-user.use-case';
 import { AuthenticateUserUseCase } from '../../../application/use-cases/authenticate-user.use-case';
+import { GetCurrentUserUseCase } from '../../../application/use-cases/get-current-user.use-case';
 import {
   AccountTemporarilyLockedError,
   InvalidCredentialsError,
+  UnauthorizedError,
 } from '../../../domain/errors/auth.error';
 import { User } from '../../../domain/entities/user.entity';
 import { toAuthGraphQLError } from '../auth-error.mapper';
@@ -16,6 +18,9 @@ import {
   UserType,
 } from '../types/auth.types';
 import { JwtConfig } from '../../jwt/jwt-config';
+import { AuthenticatedUser } from '../../jwt/jwt.strategy';
+import { CurrentUser } from '../../guards/current-user.decorator';
+import { JwtAuthGuard } from '../../guards/jwt-auth.guard';
 import { LoginRateLimitService } from '../../security/login-rate-limit.service';
 
 @Resolver()
@@ -23,9 +28,29 @@ export class AuthResolver {
   constructor(
     private readonly registerUserUseCase: RegisterUserUseCase,
     private readonly authenticateUserUseCase: AuthenticateUserUseCase,
+    private readonly getCurrentUserUseCase: GetCurrentUserUseCase,
     private readonly loginRateLimitService: LoginRateLimitService,
     @Inject('JwtConfig') private readonly jwtConfig: JwtConfig,
   ) {}
+
+  @Query(() => UserType)
+  @UseGuards(JwtAuthGuard)
+  async me(
+    @CurrentUser() currentUser: AuthenticatedUser | undefined,
+  ): Promise<UserType> {
+    try {
+      if (!currentUser) {
+        throw new UnauthorizedError();
+      }
+
+      const user = await this.getCurrentUserUseCase.execute({
+        userId: currentUser.id,
+      });
+      return this.toUserType(user);
+    } catch (error) {
+      throw toAuthGraphQLError(error);
+    }
+  }
 
   @Mutation(() => UserType)
   async createUser(@Args('input') input: CreateUserInput): Promise<UserType> {

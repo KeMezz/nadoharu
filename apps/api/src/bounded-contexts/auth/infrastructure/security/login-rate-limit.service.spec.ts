@@ -1,13 +1,16 @@
 import { AccountTemporarilyLockedError } from '../../domain/errors/auth.error';
+import { InMemoryLoginRateLimitStore } from './in-memory-login-rate-limit.store';
 import { LoginRateLimitService } from './login-rate-limit.service';
 
 describe('LoginRateLimitService', () => {
   let service: LoginRateLimitService;
+  let store: InMemoryLoginRateLimitStore;
   let nowSpy: jest.SpiedFunction<typeof Date.now>;
   let now = 1700000000000;
 
   beforeEach(() => {
-    service = new LoginRateLimitService();
+    store = new InMemoryLoginRateLimitStore();
+    service = new LoginRateLimitService(store);
     nowSpy = jest.spyOn(Date, 'now').mockImplementation(() => now);
   });
 
@@ -78,19 +81,11 @@ describe('LoginRateLimitService', () => {
     service.recordFailure('stale-user', '127.0.0.1');
     const staleKey = service.createKey('stale-user', '127.0.0.1');
 
-    expect(
-      (service as unknown as { storage: Map<string, unknown> }).storage.has(
-        staleKey,
-      ),
-    ).toBe(true);
+    expect(store.get(staleKey)).toBeDefined();
 
     now += 6 * 60 * 1000;
     service.recordFailure('fresh-user', '127.0.0.2');
 
-    expect(
-      (service as unknown as { storage: Map<string, unknown> }).storage.has(
-        staleKey,
-      ),
-    ).toBe(false);
+    expect(store.get(staleKey)).toBeUndefined();
   });
 });
