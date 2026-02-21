@@ -3,6 +3,10 @@ import {
   AccountIdError,
   AccountIdErrorCode,
 } from '../../domain/errors/account-id.error';
+import {
+  PasswordError,
+  PasswordErrorCode,
+} from '../../domain/errors/password.error';
 import { toAuthGraphQLError } from './auth-error.mapper';
 
 describe('toAuthGraphQLError', () => {
@@ -38,7 +42,19 @@ describe('toAuthGraphQLError', () => {
       ),
     );
 
-    expect(result.message).toBe('INVALID_ACCOUNT_ID_FORMAT');
+    expect(result.message).toBe('계정 ID 형식이 잘못되었습니다.');
     expect(result.extensions.code).toBe('INVALID_ACCOUNT_ID_FORMAT');
+  });
+
+  it('비밀번호 정책 에러는 코드와 사용자 메시지를 함께 보존한다', () => {
+    const result = toAuthGraphQLError(
+      new PasswordError(
+        PasswordErrorCode.PASSWORD_TOO_SHORT,
+        '비밀번호는 최소 10자 이상이어야 합니다.',
+      ),
+    );
+
+    expect(result.message).toBe('비밀번호는 최소 10자 이상이어야 합니다.');
+    expect(result.extensions.code).toBe('PASSWORD_TOO_SHORT');
   });
 });

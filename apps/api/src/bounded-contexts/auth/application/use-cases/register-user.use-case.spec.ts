@@ -7,6 +7,8 @@ import {
   AccountIdAlreadyExistsError,
   EmailAlreadyExistsError,
 } from '../../domain/errors/auth.error';
+import { EmailErrorCode } from '../../domain/errors/email.error';
+import { PasswordErrorCode } from '../../domain/errors/password.error';
 
 describe('RegisterUserUseCase', () => {
   let useCase: RegisterUserUseCase;
@@ -169,7 +171,9 @@ describe('RegisterUserUseCase', () => {
       // when & then
       await expect(useCase.execute(input)).rejects.toThrow(AccountIdError);
 
-      // 중복 확인은 수행하지만, VO 생성 시점에서 에러 발생
+      // VO 검증 실패 시 중복 확인은 수행하지 않음
+      expect(mockUserRepository.findByAccountId).not.toHaveBeenCalled();
+      expect(mockUserRepository.findByEmail).not.toHaveBeenCalled();
       expect(mockPasswordService.hash).not.toHaveBeenCalled();
       expect(mockUserRepository.save).not.toHaveBeenCalled();
     });
@@ -188,10 +192,12 @@ describe('RegisterUserUseCase', () => {
 
       // when & then
       await expect(useCase.execute(input)).rejects.toThrow(
-        'INVALID_EMAIL_FORMAT',
+        expect.objectContaining({ code: EmailErrorCode.INVALID_EMAIL_FORMAT }),
       );
 
-      // 중복 확인은 수행하지만, VO 생성 시점에서 에러 발생
+      // VO 검증 실패 시 중복 확인은 수행하지 않음
+      expect(mockUserRepository.findByAccountId).not.toHaveBeenCalled();
+      expect(mockUserRepository.findByEmail).not.toHaveBeenCalled();
       expect(mockPasswordService.hash).not.toHaveBeenCalled();
       expect(mockUserRepository.save).not.toHaveBeenCalled();
     });
@@ -209,9 +215,13 @@ describe('RegisterUserUseCase', () => {
       mockUserRepository.findByEmail.mockResolvedValue(null);
 
       // when & then
-      await expect(useCase.execute(input)).rejects.toThrow('PASSWORD_TOO_SHORT');
+      await expect(useCase.execute(input)).rejects.toThrow(
+        expect.objectContaining({ code: PasswordErrorCode.PASSWORD_TOO_SHORT }),
+      );
 
-      // 중복 확인은 수행하지만, Password VO 생성 시점에서 에러 발생
+      // VO 검증 실패 시 중복 확인은 수행하지 않음
+      expect(mockUserRepository.findByAccountId).not.toHaveBeenCalled();
+      expect(mockUserRepository.findByEmail).not.toHaveBeenCalled();
       expect(mockPasswordService.hash).not.toHaveBeenCalled();
       expect(mockUserRepository.save).not.toHaveBeenCalled();
     });
@@ -230,7 +240,9 @@ describe('RegisterUserUseCase', () => {
 
       // when & then
       await expect(useCase.execute(input)).rejects.toThrow(
-        'PASSWORD_MISSING_LOWERCASE',
+        expect.objectContaining({
+          code: PasswordErrorCode.PASSWORD_MISSING_LOWERCASE,
+        }),
       );
     });
 
@@ -248,7 +260,9 @@ describe('RegisterUserUseCase', () => {
 
       // when & then
       await expect(useCase.execute(input)).rejects.toThrow(
-        'PASSWORD_MISSING_NUMBER',
+        expect.objectContaining({
+          code: PasswordErrorCode.PASSWORD_MISSING_NUMBER,
+        }),
       );
     });
 
@@ -266,7 +280,9 @@ describe('RegisterUserUseCase', () => {
 
       // when & then
       await expect(useCase.execute(input)).rejects.toThrow(
-        'PASSWORD_MISSING_SPECIAL_CHAR',
+        expect.objectContaining({
+          code: PasswordErrorCode.PASSWORD_MISSING_SPECIAL_CHAR,
+        }),
       );
     });
 

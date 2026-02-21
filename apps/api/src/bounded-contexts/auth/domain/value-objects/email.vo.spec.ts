@@ -1,4 +1,5 @@
 import { Email } from './email.vo';
+import { EmailErrorCode } from '../errors/email.error';
 
 describe('Email Value Object', () => {
   describe('유효한 이메일', () => {
@@ -37,27 +38,39 @@ describe('Email Value Object', () => {
 
   describe('무효한 이메일', () => {
     it('should throw error for missing local part', () => {
-      expect(() => Email.create('@example.com')).toThrow('INVALID_EMAIL_FORMAT');
+      expect(() => Email.create('@example.com')).toThrow(
+        expect.objectContaining({ code: EmailErrorCode.INVALID_EMAIL_FORMAT }),
+      );
     });
 
     it('should throw error for missing domain', () => {
-      expect(() => Email.create('user@')).toThrow('INVALID_EMAIL_FORMAT');
+      expect(() => Email.create('user@')).toThrow(
+        expect.objectContaining({ code: EmailErrorCode.INVALID_EMAIL_FORMAT }),
+      );
     });
 
     it('should throw error for missing @ symbol', () => {
-      expect(() => Email.create('user')).toThrow('INVALID_EMAIL_FORMAT');
+      expect(() => Email.create('user')).toThrow(
+        expect.objectContaining({ code: EmailErrorCode.INVALID_EMAIL_FORMAT }),
+      );
     });
 
     it('should throw error for whitespace in email', () => {
-      expect(() => Email.create('user @example.com')).toThrow('INVALID_EMAIL_FORMAT');
+      expect(() => Email.create('user @example.com')).toThrow(
+        expect.objectContaining({ code: EmailErrorCode.INVALID_EMAIL_FORMAT }),
+      );
     });
 
     it('should throw error for empty string', () => {
-      expect(() => Email.create('')).toThrow('INVALID_EMAIL_FORMAT');
+      expect(() => Email.create('')).toThrow(
+        expect.objectContaining({ code: EmailErrorCode.INVALID_EMAIL_FORMAT }),
+      );
     });
 
     it('should throw error for multiple @ symbols', () => {
-      expect(() => Email.create('user@@example.com')).toThrow('INVALID_EMAIL_FORMAT');
+      expect(() => Email.create('user@@example.com')).toThrow(
+        expect.objectContaining({ code: EmailErrorCode.INVALID_EMAIL_FORMAT }),
+      );
     });
   });
 

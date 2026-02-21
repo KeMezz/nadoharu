@@ -2,6 +2,7 @@ import { User } from './user.entity';
 import { AccountId } from '../value-objects/account-id.vo';
 import { Email } from '../value-objects/email.vo';
 import { AccountIdError } from '../errors/account-id.error';
+import { EmailErrorCode } from '../errors/email.error';
 
 describe('User Entity', () => {
   describe('create() 팩토리 메서드', () => {
@@ -19,7 +20,9 @@ describe('User Entity', () => {
 
       // then
       expect(user.getId()).toBeTruthy();
-      expect(user.getId()).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i); // UUID v4 형식
+      expect(user.getId()).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+      ); // UUID v4 형식
       expect(user.getAccountId()).toBeInstanceOf(AccountId);
       expect(user.getAccountId().getValue()).toBe('user_123');
       expect(user.getEmail()).toBeInstanceOf(Email);
@@ -77,7 +80,9 @@ describe('User Entity', () => {
       };
 
       // when & then
-      expect(() => User.create(props)).toThrow('INVALID_EMAIL_FORMAT');
+      expect(() => User.create(props)).toThrow(
+        expect.objectContaining({ code: EmailErrorCode.INVALID_EMAIL_FORMAT }),
+      );
     });
 
     it('name이 빈 문자열이면 NAME_REQUIRED 에러를 던져야 한다', () => {
@@ -190,7 +195,9 @@ describe('User Entity', () => {
       };
 
       // when & then
-      expect(() => User.reconstitute(props)).toThrow('INVALID_EMAIL_FORMAT');
+      expect(() => User.reconstitute(props)).toThrow(
+        expect.objectContaining({ code: EmailErrorCode.INVALID_EMAIL_FORMAT }),
+      );
     });
 
     it('reconstitute 시에도 name 검증을 수행해야 한다', () => {
