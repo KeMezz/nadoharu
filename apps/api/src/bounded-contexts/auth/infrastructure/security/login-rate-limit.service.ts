@@ -1,10 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { AccountTemporarilyLockedError } from '../../domain/errors/auth.error';
-
-interface RateLimitEntry {
-  failureTimestamps: number[];
-  lockedUntil: number | null;
-}
+import {
+  LOGIN_RATE_LIMIT_STORE,
+  LoginRateLimitStore,
+} from './login-rate-limit.store';
 
 @Injectable()
 export class LoginRateLimitService {
@@ -13,9 +12,12 @@ export class LoginRateLimitService {
   private static readonly LOCK_DURATION_MS = 10 * 60 * 1000;
   private static readonly CLEANUP_INTERVAL_MS = 60 * 1000;
 
-  // In-memory limiter: 다중 인스턴스 환경에서는 공유 저장소(예: Redis)로 교체가 필요하다.
-  private readonly storage = new Map<string, RateLimitEntry>();
   private lastCleanupAt = 0;
+
+  constructor(
+    @Inject(LOGIN_RATE_LIMIT_STORE)
+    private readonly store: LoginRateLimitStore,
+  ) {}
 
   createKey(accountId: string, ip: string): string {
     return `ratelimit:${accountId.toLowerCase()}:${ip}`;
@@ -32,19 +34,22 @@ export class LoginRateLimitService {
     this.cleanup(now);
 
     const key = this.createKey(accountId, ip);
-    const entry = this.storage.get(key);
+    const entry = this.store.get(key);
 
     if (!entry || !entry.lockedUntil) {
       return false;
     }
 
     if (entry.lockedUntil <= now) {
-      entry.lockedUntil = null;
+      const unlockedEntry = {
+        failureTimestamps: [...entry.failureTimestamps],
+        lockedUntil: null,
+      };
 
-      if (entry.failureTimestamps.length === 0) {
-        this.storage.delete(key);
+      if (unlockedEntry.failureTimestamps.length === 0) {
+        this.store.delete(key);
       } else {
-        this.storage.set(key, entry);
+        this.store.set(key, unlockedEntry);
       }
 
       return false;
@@ -58,30 +63,34 @@ export class LoginRateLimitService {
     this.cleanup(now);
 
     const key = this.createKey(accountId, ip);
-    const entry = this.storage.get(key) ?? {
+    const existingEntry = this.store.get(key) ?? {
       failureTimestamps: [],
       lockedUntil: null,
     };
 
-    entry.failureTimestamps = entry.failureTimestamps.filter(
+    const recentFailures = existingEntry.failureTimestamps.filter(
       (timestamp) => now - timestamp <= LoginRateLimitService.WINDOW_MS,
     );
-    entry.failureTimestamps.push(now);
+    const nextFailureTimestamps = [...recentFailures, now];
 
-    if (entry.failureTimestamps.length >= LoginRateLimitService.MAX_FAILURES) {
-      entry.lockedUntil = now + LoginRateLimitService.LOCK_DURATION_MS;
-      entry.failureTimestamps = [];
-      this.storage.set(key, entry);
+    if (nextFailureTimestamps.length >= LoginRateLimitService.MAX_FAILURES) {
+      this.store.set(key, {
+        failureTimestamps: [],
+        lockedUntil: now + LoginRateLimitService.LOCK_DURATION_MS,
+      });
       return { locked: true };
     }
 
-    this.storage.set(key, entry);
+    this.store.set(key, {
+      failureTimestamps: nextFailureTimestamps,
+      lockedUntil: existingEntry.lockedUntil,
+    });
     return { locked: false };
   }
 
   reset(accountId: string, ip: string): void {
     const key = this.createKey(accountId, ip);
-    this.storage.delete(key);
+    this.store.delete(key);
   }
 
   private cleanup(now: number): void {
@@ -89,21 +98,24 @@ export class LoginRateLimitService {
       return;
     }
 
-    for (const [key, entry] of this.storage.entries()) {
-      entry.failureTimestamps = entry.failureTimestamps.filter(
+    for (const [key, entry] of this.store.entries()) {
+      const failureTimestamps = entry.failureTimestamps.filter(
         (timestamp) => now - timestamp <= LoginRateLimitService.WINDOW_MS,
       );
+      const lockedUntil =
+        entry.lockedUntil !== null && entry.lockedUntil <= now
+          ? null
+          : entry.lockedUntil;
 
-      if (entry.lockedUntil !== null && entry.lockedUntil <= now) {
-        entry.lockedUntil = null;
-      }
-
-      if (entry.lockedUntil === null && entry.failureTimestamps.length === 0) {
-        this.storage.delete(key);
+      if (lockedUntil === null && failureTimestamps.length === 0) {
+        this.store.delete(key);
         continue;
       }
 
-      this.storage.set(key, entry);
+      this.store.set(key, {
+        failureTimestamps,
+        lockedUntil,
+      });
     }
 
     this.lastCleanupAt = now;

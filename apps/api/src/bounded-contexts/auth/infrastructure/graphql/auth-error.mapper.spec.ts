@@ -1,4 +1,8 @@
 import { GraphQLError } from 'graphql';
+import {
+  AccountIdError,
+  AccountIdErrorCode,
+} from '../../domain/errors/account-id.error';
 import { toAuthGraphQLError } from './auth-error.mapper';
 
 describe('toAuthGraphQLError', () => {
@@ -24,5 +28,17 @@ describe('toAuthGraphQLError', () => {
 
     expect(result.message).toBe('INTERNAL_SERVER_ERROR');
     expect(result.extensions.code).toBe('INTERNAL_SERVER_ERROR');
+  });
+
+  it('message가 일반 문구여도 error.code가 허용 코드면 해당 코드로 변환한다', () => {
+    const result = toAuthGraphQLError(
+      new AccountIdError(
+        AccountIdErrorCode.INVALID_ACCOUNT_ID_FORMAT,
+        '계정 ID 형식이 잘못되었습니다.',
+      ),
+    );
+
+    expect(result.message).toBe('INVALID_ACCOUNT_ID_FORMAT');
+    expect(result.extensions.code).toBe('INVALID_ACCOUNT_ID_FORMAT');
   });
 });

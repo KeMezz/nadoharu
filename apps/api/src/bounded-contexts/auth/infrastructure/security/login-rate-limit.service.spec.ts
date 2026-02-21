@@ -1,13 +1,50 @@
 import { AccountTemporarilyLockedError } from '../../domain/errors/auth.error';
+import { InMemoryLoginRateLimitStore } from './in-memory-login-rate-limit.store';
 import { LoginRateLimitService } from './login-rate-limit.service';
+import { LoginRateLimitStore, RateLimitEntry } from './login-rate-limit.store';
+
+class SnapshotLoginRateLimitStore implements LoginRateLimitStore {
+  private readonly storage = new Map<string, RateLimitEntry>();
+
+  get(key: string): RateLimitEntry | undefined {
+    const entry = this.storage.get(key);
+    return entry ? this.snapshot(entry) : undefined;
+  }
+
+  set(key: string, entry: RateLimitEntry): void {
+    this.storage.set(key, this.snapshot(entry));
+  }
+
+  delete(key: string): void {
+    this.storage.delete(key);
+  }
+
+  entries(): IterableIterator<[string, RateLimitEntry]> {
+    const snapshots = Array.from(
+      this.storage.entries(),
+      ([key, entry]) => [key, this.snapshot(entry)] as [string, RateLimitEntry],
+    );
+
+    return snapshots[Symbol.iterator]();
+  }
+
+  private snapshot(entry: RateLimitEntry): RateLimitEntry {
+    return Object.freeze({
+      failureTimestamps: [...entry.failureTimestamps],
+      lockedUntil: entry.lockedUntil,
+    }) as RateLimitEntry;
+  }
+}
 
 describe('LoginRateLimitService', () => {
   let service: LoginRateLimitService;
+  let store: InMemoryLoginRateLimitStore;
   let nowSpy: jest.SpiedFunction<typeof Date.now>;
   let now = 1700000000000;
 
   beforeEach(() => {
-    service = new LoginRateLimitService();
+    store = new InMemoryLoginRateLimitStore();
+    service = new LoginRateLimitService(store);
     nowSpy = jest.spyOn(Date, 'now').mockImplementation(() => now);
   });
 
@@ -78,19 +115,30 @@ describe('LoginRateLimitService', () => {
     service.recordFailure('stale-user', '127.0.0.1');
     const staleKey = service.createKey('stale-user', '127.0.0.1');
 
-    expect(
-      (service as unknown as { storage: Map<string, unknown> }).storage.has(
-        staleKey,
-      ),
-    ).toBe(true);
+    expect(store.get(staleKey)).toBeDefined();
 
     now += 6 * 60 * 1000;
     service.recordFailure('fresh-user', '127.0.0.2');
 
-    expect(
-      (service as unknown as { storage: Map<string, unknown> }).storage.has(
-        staleKey,
-      ),
-    ).toBe(false);
+    expect(store.get(staleKey)).toBeUndefined();
+  });
+
+  it('store가 불변 스냅샷을 반환해도 실패 기록과 잠금 해제가 동작한다', () => {
+    const snapshotStore = new SnapshotLoginRateLimitStore();
+    service = new LoginRateLimitService(snapshotStore);
+
+    for (let index = 0; index < 10; index += 1) {
+      const result = service.recordFailure('testuser', '127.0.0.1');
+      if (index < 9) {
+        expect(result.locked).toBe(false);
+      }
+      now += 1000;
+    }
+
+    expect(service.isLocked('testuser', '127.0.0.1')).toBe(true);
+
+    now += 10 * 60 * 1000 + 1;
+
+    expect(service.isLocked('testuser', '127.0.0.1')).toBe(false);
   });
 });

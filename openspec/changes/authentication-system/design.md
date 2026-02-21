@@ -164,8 +164,8 @@ apps/api/src/bounded-contexts/auth/
 - accountId 기반 전역 잠금: 공격자가 여러 IP로 공격 시 무력화
 
 **구현:**
-- **프로덕션**: Redis (다중 서버 환경 대응)
-- **개발/테스트**: in-memory 카운터 (단일 서버)
+- **현재 구현(단일 인스턴스)**: in-memory 카운터
+- **확장 단계(다중 인스턴스)**: Redis 백엔드로 교체
 - 키: `ratelimit:${accountId}:${ip}`
 - TTL: 5분
 - 로그인 성공 시 카운터 초기화
@@ -208,14 +208,14 @@ apps/api/src/bounded-contexts/auth/
 - `@CurrentUser` 데코레이터: JWT 페이로드에서 사용자 정보 추출
 - `GqlExecutionContext` 사용: GraphQL 컨텍스트 지원
 
-### 8. 이메일 검증: class-validator @IsEmail()
+### 8. 이메일 검증: 형식 검증 + 정규화
 
-**결정:** class-validator의 `@IsEmail()` 데코레이터 사용, 소문자 정규화
+**결정:** 이메일은 저장 전 `trim + lowercase`로 정규화하고, 형식 검증은 도메인 VO에서 기본 형식을 보장한다. 필요 시 인프라 입력 계층에서 class-validator `@IsEmail()`을 추가 적용한다.
 
 **이유:**
-- NestJS 표준 검증 라이브러리
-- RFC 5322 기반 검증
-- 커스텀 정규식보다 안정적
+- 도메인 계층에서 불변조건을 직접 보장 가능
+- 입력 계층 DTO 유무와 무관하게 동일한 도메인 규칙 유지
+- 인프라에서 더 엄격한 검증이 필요할 때 `@IsEmail()`로 확장 가능
 
 **정규화 규칙:**
 - 저장 전 소문자 변환

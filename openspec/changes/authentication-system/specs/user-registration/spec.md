@@ -18,7 +18,7 @@
 - **THEN** 시스템은 `EMAIL_ALREADY_EXISTS` 에러를 반환한다
 
 ### Requirement: accountId는 데이터베이스에서 고유해야 한다
-시스템은 accountId의 고유성을 데이터베이스 unique 제약조건으로 보장해야 한다(MUST). 중복 검사는 대소문자를 구분해야 한다(MUST).
+시스템은 accountId의 고유성을 데이터베이스 unique 제약조건으로 보장해야 한다(MUST). accountId는 소문자 패턴(`^[a-z0-9_]{3,20}$`)만 허용하므로, 중복 검사는 소문자 기준으로 일관되게 처리해야 한다(MUST).
 
 #### Scenario: 고유한 accountId 허용
 - **WHEN** 사용자가 데이터베이스에 존재하지 않는 accountId를 제공한다
@@ -56,7 +56,7 @@
 - **THEN** 시스템은 `INVALID_ACCOUNT_ID_FORMAT` 에러를 반환한다
 
 ### Requirement: email은 유효한 이메일 형식이어야 한다
-시스템은 email 필드가 유효한 이메일 형식인지 class-validator의 `@IsEmail()` 데코레이터를 사용하여 검증해야 한다(MUST). 이메일 주소는 저장 전 소문자로 정규화되어야 하며(MUST), 고유성 비교 시 대소문자를 구분하지 않아야 한다(MUST).
+시스템은 email 필드가 유효한 이메일 형식인지 검증해야 한다(MUST). 구현은 class-validator의 `@IsEmail()` 또는 동등 수준의 형식 검증 로직을 사용할 수 있다(SHOULD). 이메일 주소는 저장 전 소문자로 정규화되어야 하며(MUST), 고유성 비교 시 대소문자를 구분하지 않아야 한다(MUST).
 
 #### Scenario: 유효한 이메일 형식
 - **WHEN** 사용자가 "user@example.com" 같은 유효한 이메일을 제공한다

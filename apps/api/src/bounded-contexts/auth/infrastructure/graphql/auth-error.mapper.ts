@@ -18,9 +18,29 @@ const ALLOWED_CODES = new Set([
   'NAME_TOO_LONG',
 ]);
 
+function extractCode(error: unknown): string | null {
+  if (error instanceof Error) {
+    const maybeCode = (error as Error & { code?: unknown }).code;
+    if (typeof maybeCode === 'string') {
+      return maybeCode;
+    }
+  }
+
+  return null;
+}
+
 export function toAuthGraphQLError(error: unknown): GraphQLError {
   if (error instanceof GraphQLError) {
     return error;
+  }
+
+  const codeFromProperty = extractCode(error);
+  if (codeFromProperty && ALLOWED_CODES.has(codeFromProperty)) {
+    return new GraphQLError(codeFromProperty, {
+      extensions: {
+        code: codeFromProperty,
+      },
+    });
   }
 
   const message =
