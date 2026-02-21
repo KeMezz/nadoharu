@@ -15,6 +15,7 @@ export function formatGraphQLError(
     return error;
   }
 
+  // Fallback: mapper를 거치지 않은 에러에서도 메시지 기반 code를 보존한다.
   const code = isAuthErrorCode(error.message)
     ? error.message
     : AuthErrorCode.INTERNAL_SERVER_ERROR;

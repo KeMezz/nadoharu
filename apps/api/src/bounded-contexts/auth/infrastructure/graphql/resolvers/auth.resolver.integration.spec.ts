@@ -672,10 +672,11 @@ describe('AuthResolver (Integration)', () => {
         },
       });
 
+      const token = extractAccessToken(loginResult.setCookie);
       const meResult = await executeGraphql<MePayload>({
         query: ME_QUERY,
         headers: {
-          cookie: loginResult.setCookie ?? '',
+          cookie: `accessToken=${token}`,
         },
       });
 
@@ -716,10 +717,11 @@ describe('AuthResolver (Integration)', () => {
 
       nowSpy.mockReturnValue(baseTime + 16 * 60 * 1000);
 
+      const token = extractAccessToken(loginResult.setCookie);
       const meResult = await executeGraphql<MePayload>({
         query: ME_QUERY,
         headers: {
-          cookie: loginResult.setCookie ?? '',
+          cookie: `accessToken=${token}`,
         },
       });
 
@@ -848,10 +850,11 @@ describe('AuthResolver (Integration)', () => {
         },
       });
 
+      const token = extractAccessToken(loginResult.setCookie);
       const meResult = await executeGraphql<MePayload>({
         query: ME_QUERY,
         headers: {
-          cookie: loginResult.setCookie ?? '',
+          cookie: `accessToken=${token}`,
         },
       });
 
