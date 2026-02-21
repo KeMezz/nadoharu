@@ -8,7 +8,7 @@
 
 - **회원가입 기능**: GraphQL Mutation으로 새 사용자 등록 (`createUser`)
 - **로그인 기능**: GraphQL Mutation으로 인증 후 JWT 토큰 발급 (`login`)
-- **JWT 토큰 관리**: 액세스 토큰 발급, 검증, 갱신
+- **JWT 토큰 관리**: 액세스 토큰 발급, 검증
 - **세션 쿠키**: httpOnly cookie로 JWT 관리 (XSS 방지)
 - **비밀번호 보안**: bcrypt 해싱, 정책 검증 (10자 이상, 소문자+숫자+특수문자)
 - **인증 가드**: GraphQL Resolver에서 인증 필요 작업 보호
@@ -26,7 +26,7 @@
 
 - `user-registration`: 회원가입 API — 사용자 계정 생성 (account_id, password, email, name)
 - `user-authentication`: 로그인 API — 자격 증명 검증 후 JWT 토큰 발급
-- `jwt-token-management`: JWT 토큰 발급, 검증, 갱신 로직
+- `jwt-token-management`: JWT 토큰 발급, 검증 로직
 - `password-security`: 비밀번호 해싱 및 정책 검증 (bcrypt, 복잡도 규칙)
 - `auth-guards`: GraphQL Resolver 보호를 위한 인증 가드/데코레이터
 
