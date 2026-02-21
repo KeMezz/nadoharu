@@ -158,7 +158,7 @@ describe('AuthResolver', () => {
       expect(result.user.id).toBe(mockUser.getId());
     });
 
-    it('x-forwarded-for 헤더가 있으면 해당 IP를 사용한다', async () => {
+    it('x-forwarded-for 헤더가 있어도 request.ip를 우선 사용한다', async () => {
       authenticateUserUseCase.execute.mockResolvedValue({
         accessToken: 'jwt.token.value',
         user: mockUser,
@@ -183,7 +183,7 @@ describe('AuthResolver', () => {
 
       expect(loginRateLimitService.assertNotLocked).toHaveBeenCalledWith(
         'testuser',
-        '10.1.1.1',
+        '127.0.0.1',
       );
     });
 

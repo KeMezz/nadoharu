@@ -76,12 +76,8 @@ export class AuthResolver {
   }
 
   private extractIp(request: Request): string {
-    const forwarded = request.headers['x-forwarded-for'];
-    if (typeof forwarded === 'string' && forwarded.length > 0) {
-      return forwarded.split(',')[0].trim();
-    }
-
-    return request.ip || 'unknown';
+    const ip = request.ip?.trim();
+    return ip && ip.length > 0 ? ip : 'unknown';
   }
 
   private toUserType(user: User): UserType {

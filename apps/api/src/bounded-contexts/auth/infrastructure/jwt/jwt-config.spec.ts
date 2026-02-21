@@ -8,9 +8,14 @@ describe('jwt-config', () => {
       ['30s', 30000],
       ['100ms', 100],
       ['2d', 172800000],
-      ['60', 60000],
     ])('%s를 밀리초로 변환한다', (input, expected) => {
       expect(parseDurationToMs(input)).toBe(expected);
+    });
+
+    it('단위 없는 숫자 문자열이면 에러를 던진다', () => {
+      expect(() => parseDurationToMs('60')).toThrow(
+        'INVALID_JWT_EXPIRES_IN_FORMAT',
+      );
     });
 
     it('지원하지 않는 형식이면 에러를 던진다', () => {
@@ -39,6 +44,15 @@ describe('jwt-config', () => {
 
       expect(config.expiresIn).toBe('15m');
       expect(config.expiresInMs).toBe(900000);
+    });
+
+    it('JWT_EXPIRES_IN이 단위 없는 숫자 문자열이면 에러를 던진다', () => {
+      expect(() =>
+        validateJwtConfig({
+          JWT_SECRET: 'a'.repeat(32),
+          JWT_EXPIRES_IN: '60',
+        }),
+      ).toThrow('INVALID_JWT_EXPIRES_IN_FORMAT');
     });
 
     it('JWT_SECRET이 없으면 에러를 던진다', () => {

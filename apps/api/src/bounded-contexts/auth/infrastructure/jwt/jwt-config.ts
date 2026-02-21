@@ -1,7 +1,7 @@
 const DEFAULT_JWT_EXPIRES_IN = '15m';
 const MIN_SECRET_LENGTH = 32;
 
-type JwtExpiresIn = `${number}` | `${number}${'ms' | 's' | 'm' | 'h' | 'd'}`;
+type JwtExpiresIn = `${number}${'ms' | 's' | 'm' | 'h' | 'd'}`;
 
 export interface JwtConfig {
   secret: string;
@@ -11,11 +11,6 @@ export interface JwtConfig {
 
 export function parseDurationToMs(value: string): number {
   const normalized = value.trim();
-
-  const numeric = Number(normalized);
-  if (!Number.isNaN(numeric) && Number.isFinite(numeric)) {
-    return numeric * 1000;
-  }
 
   const match = /^(\d+)(ms|s|m|h|d)$/.exec(normalized);
   if (!match) {
@@ -53,14 +48,12 @@ export function validateJwtConfig(env: NodeJS.ProcessEnv): JwtConfig {
     );
   }
 
-  const expiresIn =
-    (env.JWT_EXPIRES_IN?.trim() as JwtExpiresIn | undefined) ||
-    (DEFAULT_JWT_EXPIRES_IN as JwtExpiresIn);
+  const expiresIn = env.JWT_EXPIRES_IN?.trim() || DEFAULT_JWT_EXPIRES_IN;
   const expiresInMs = parseDurationToMs(expiresIn);
 
   return {
     secret,
-    expiresIn,
+    expiresIn: expiresIn as JwtExpiresIn,
     expiresInMs,
   };
 }
