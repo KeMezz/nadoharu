@@ -1,3 +1,5 @@
+# Monorepo Structure Specification
+
 ## Purpose
 
 pnpm workspace 기반 모노레포 구조와 각 애플리케이션/공유 패키지의 필수 구성 기준을 정의한다.

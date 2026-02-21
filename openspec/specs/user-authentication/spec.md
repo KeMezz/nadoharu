@@ -8,7 +8,7 @@
 
 ### Requirement: 사용자는 accountId와 password로 로그인할 수 있다
 
-시스템은 GraphQL Mutation `login`을 통해 사용자 인증을 수행해야 한다(SHALL). 입력값은 accountId와 password를 포함해야 한다(MUST).
+시스템은 GraphQL Mutation `login`을 통해 사용자 인증을 수행해야 한다(MUST). 입력값은 accountId와 password를 포함해야 한다(MUST).
 
 #### Scenario: 유효한 자격 증명으로 로그인 성공
 
@@ -89,7 +89,7 @@
 
 ### Requirement: 로그인 엔드포인트는 무차별 대입 공격으로부터 보호되어야 한다
 
-시스템은 로그인 엔드포인트에 rate limiting을 적용하여 무차별 대입 공격을 방지해야 한다(MUST). accountId와 IP 조합을 키로 하여 5분 내 10회 이상 로그인 실패 시 해당 accountId+IP를 10분간 잠금해야 한다(MUST). 로그인 성공 시 카운터를 초기화해야 한다(MUST).
+시스템은 로그인 엔드포인트에 rate limiting을 적용하여 무차별 대입 공격을 방지해야 한다(MUST). accountId와 IP 조합을 키로 하여 5분 내 10회 이상 로그인 실패 시 해당 accountId+IP를 10분간 잠금해야 한다(MUST). 로그인 성공 시 카운터를 초기화해야 한다(MUST). 단일 인스턴스 환경에서는 인메모리 저장소를 사용할 수 있고(SHOULD), 다중 인스턴스 환경에서는 Redis 같은 공유 저장소를 사용해야 한다(MUST).
 
 #### Scenario: 정상적인 로그인 시도 허용
 

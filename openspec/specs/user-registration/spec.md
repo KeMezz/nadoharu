@@ -8,7 +8,7 @@
 
 ### Requirement: 사용자는 accountId, password, email, name으로 회원가입할 수 있다
 
-시스템은 GraphQL Mutation `createUser`를 통해 새 사용자 계정을 생성해야 한다(SHALL). 입력값은 accountId(고유 식별자), password(원본 비밀번호), email(이메일 주소), name(사용자 이름)을 포함해야 한다(MUST). GraphQL 필드명은 camelCase를 사용해야 한다(MUST).
+시스템은 GraphQL Mutation `createUser`를 통해 새 사용자 계정을 생성해야 한다(MUST). 입력값은 accountId(고유 식별자), password(원본 비밀번호), email(이메일 주소), name(사용자 이름)을 포함해야 한다(MUST). GraphQL 필드명은 camelCase를 사용해야 한다(MUST).
 
 #### Scenario: 유효한 정보로 회원가입 성공
 
