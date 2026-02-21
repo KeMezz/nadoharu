@@ -7,6 +7,7 @@ import {
   PasswordError,
   PasswordErrorCode,
 } from '../../domain/errors/password.error';
+import { NameError, NameErrorCode } from '../../domain/errors/name.error';
 import { toAuthGraphQLError } from './auth-error.mapper';
 
 describe('toAuthGraphQLError', () => {
@@ -56,5 +57,14 @@ describe('toAuthGraphQLError', () => {
 
     expect(result.message).toBe('비밀번호는 최소 10자 이상이어야 합니다.');
     expect(result.extensions.code).toBe('PASSWORD_TOO_SHORT');
+  });
+
+  it('이름 검증 에러는 코드와 사용자 메시지를 함께 보존한다', () => {
+    const result = toAuthGraphQLError(
+      new NameError(NameErrorCode.NAME_REQUIRED, '이름은 필수 입력 값입니다.'),
+    );
+
+    expect(result.message).toBe('이름은 필수 입력 값입니다.');
+    expect(result.extensions.code).toBe('NAME_REQUIRED');
   });
 });

@@ -104,7 +104,7 @@ chore: 프로젝트 초기 설정
 ### OpenCode 커맨드
 
 - OpenSpec 공식 OpenCode 커맨드는 `.opencode/command/opsx-*.md` 기준으로 사용
-- 커스텀 커맨드는 `.opencode/command/`에 유지 (`/branch-and-commit`, `/create-pr`, `/resolve-claude-review`)
+- 커스텀 커맨드는 `.opencode/command/`에 유지 (`/branch-and-commit`, `/create-pr`, `/resolve-claude-review`, `/merge-and-sync-main`)
 - OpenCode에서는 커스텀 워크플로우를 skill보다 command 우선으로 관리
 
 ## 아키텍처

@@ -42,9 +42,8 @@ export function toAuthGraphQLError(error: unknown): GraphQLError {
   }
 
   // 호환성 유지:
-  // - 기존 auth.error.ts 에러: message === CODE, code 프로퍼티 없음
-  // - 신규 VO/도메인 에러: code + 사용자 메시지 분리
-  // 위 분기에서 신규 패턴을 우선 처리하고, 여기서 기존 패턴을 정규화한다.
+  // - 위 분기: code 프로퍼티가 있는 알려진 인증 에러를 처리
+  // - 여기 분기: code가 없거나 허용되지 않은 unknown 에러를 message 기반으로 정규화
   const message =
     error instanceof Error
       ? error.message

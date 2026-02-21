@@ -42,35 +42,32 @@ export class RegisterUserUseCase {
 
   async execute(input: RegisterUserInput): Promise<User> {
     // 1. VO 검증 (빠른 로컬 연산 우선)
-    Password.create(input.password);
-    AccountId.create(input.accountId);
-    Email.create(input.email);
-    // Name 검증은 User.create() 내부에서 수행
+    const password = Password.create(input.password).getValue();
+    const accountId = AccountId.create(input.accountId).getValue();
+    const email = Email.create(input.email).getValue();
+    const name = User.validateName(input.name);
 
     // 2. 중복 확인 - accountId
-    const existingUserByAccountId = await this.userRepository.findByAccountId(
-      input.accountId,
-    );
+    const existingUserByAccountId =
+      await this.userRepository.findByAccountId(accountId);
     if (existingUserByAccountId) {
       throw new AccountIdAlreadyExistsError();
     }
 
     // 3. 중복 확인 - email
-    const existingUserByEmail = await this.userRepository.findByEmail(
-      input.email,
-    );
+    const existingUserByEmail = await this.userRepository.findByEmail(email);
     if (existingUserByEmail) {
       throw new EmailAlreadyExistsError();
     }
 
     // 4. 비밀번호 해싱
-    const passwordHash = await this.passwordService.hash(input.password);
+    const passwordHash = await this.passwordService.hash(password);
 
     // 5. User 엔티티 생성 및 저장 (한 번만)
     const user = User.create({
-      accountId: input.accountId,
-      email: input.email,
-      name: input.name,
+      accountId,
+      email,
+      name,
       passwordHash,
     });
 

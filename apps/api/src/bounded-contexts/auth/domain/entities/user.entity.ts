@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
 import { AccountId } from '../value-objects/account-id.vo';
 import { Email } from '../value-objects/email.vo';
+import { NameError, NameErrorCode } from '../errors/name.error';
 
 interface CreateUserProps {
   accountId: string;
@@ -38,7 +39,8 @@ export class User {
    * 새로운 User 생성
    * @param props User 생성 속성
    * @throws {AccountIdError} 유효하지 않은 accountId
-   * @throws {Error} 유효하지 않은 email 또는 name
+   * @throws {EmailError} 유효하지 않은 email
+   * @throws {NameError} 유효하지 않은 name
    */
   static create(props: CreateUserProps): User {
     // 1. VO 생성 (자동 검증)
@@ -46,13 +48,7 @@ export class User {
     const email = Email.create(props.email);
 
     // 2. name 검증
-    const trimmedName = props.name.trim();
-    if (!trimmedName) {
-      throw new Error('NAME_REQUIRED');
-    }
-    if (trimmedName.length > 50) {
-      throw new Error('NAME_TOO_LONG');
-    }
+    const trimmedName = User.validateName(props.name);
 
     // 3. 자동 생성 필드
     const id = randomUUID();
@@ -74,7 +70,8 @@ export class User {
    * DB 데이터로 User 재구성
    * @param props User 재구성 속성
    * @throws {AccountIdError} 유효하지 않은 accountId
-   * @throws {Error} 유효하지 않은 email 또는 name
+   * @throws {EmailError} 유효하지 않은 email
+   * @throws {NameError} 유효하지 않은 name
    */
   static reconstitute(props: ReconstituteUserProps): User {
     // VO 생성 (자동 검증)
@@ -82,13 +79,7 @@ export class User {
     const email = Email.create(props.email);
 
     // name 검증
-    const trimmedName = props.name.trim();
-    if (!trimmedName) {
-      throw new Error('NAME_REQUIRED');
-    }
-    if (trimmedName.length > 50) {
-      throw new Error('NAME_TOO_LONG');
-    }
+    const trimmedName = User.validateName(props.name);
 
     return new User(
       props.id,
@@ -99,6 +90,24 @@ export class User {
       props.createdAt,
       props.updatedAt,
     );
+  }
+
+  static validateName(name: string): string {
+    const trimmedName = name.trim();
+    if (!trimmedName) {
+      throw new NameError(
+        NameErrorCode.NAME_REQUIRED,
+        '이름은 필수 입력 값입니다.',
+      );
+    }
+    if (trimmedName.length > 50) {
+      throw new NameError(
+        NameErrorCode.NAME_TOO_LONG,
+        '이름은 50자 이하여야 합니다.',
+      );
+    }
+
+    return trimmedName;
   }
 
   // Getter 메서드들
