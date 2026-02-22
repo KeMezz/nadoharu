@@ -70,7 +70,7 @@
 
 #### Scenario: 허용되지 않은 문자 포함
 
-- **WHEN** 사용자가 대문자 또는 특수문자(\_, 제외)를 포함한 accountId를 제공한다
+- **WHEN** 사용자가 대문자 또는 언더스코어(\_)를 제외한 특수문자를 포함한 accountId를 제공한다
 - **THEN** 시스템은 `INVALID_ACCOUNT_ID_FORMAT` 에러를 반환한다
 
 ### Requirement: email은 유효한 이메일 형식이어야 한다
