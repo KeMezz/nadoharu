@@ -11,7 +11,7 @@
 
 ```bash
 mkdir -p .legacy
-git clone <nadoharu-front-repo-url> .legacy/nadoharu-front
+git clone https://github.com/GuitarCoders/nadoharu-front .legacy/nadoharu-front
 ```
 
 ## 필수 규칙

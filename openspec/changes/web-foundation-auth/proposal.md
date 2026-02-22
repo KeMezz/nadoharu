@@ -40,3 +40,4 @@
 **레거시 참조 (`nadoharu-front` 레포지토리)**:
 
 - 디자인/UX 참고 소스로 활용하며, 데이터 계약은 현행 API 스펙 기준으로 재정의
+- 로컬 참조 경로는 `.legacy/nadoharu-front`를 사용하고, 공식 저장소 URL은 `.legacy/README.md`에서 관리
