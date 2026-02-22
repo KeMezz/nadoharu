@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { AuthGuard } from './AuthGuard';
 
 const mockCheckAuthStatus = vi.fn();
@@ -42,31 +42,63 @@ describe('AuthGuard', () => {
   });
 
   it('인증 성공 시 자식 컴포넌트를 렌더링한다', async () => {
-    mockCheckAuthStatus.mockResolvedValue({
-      authenticated: true,
-      user: { id: '1', accountId: 'testuser', email: 'test@example.com', name: 'Test' },
-    });
+    let resolveAuthStatus: (value: {
+      authenticated: boolean;
+      user: {
+        id: string;
+        accountId: string;
+        email: string;
+        name: string;
+      } | null;
+    }) => void;
+    mockCheckAuthStatus.mockReturnValue(
+      new Promise((resolve) => {
+        resolveAuthStatus = resolve;
+      }),
+    );
+
     render(
       <AuthGuard>
         <div>보호된 콘텐츠</div>
       </AuthGuard>,
     );
 
-    await vi.waitFor(() => {
-      expect(screen.getByText('보호된 콘텐츠')).toBeInTheDocument();
+    await act(async () => {
+      resolveAuthStatus!({
+        authenticated: true,
+        user: {
+          id: '1',
+          accountId: 'testuser',
+          email: 'test@example.com',
+          name: 'Test',
+        },
+      });
     });
+
+    expect(screen.getByText('보호된 콘텐츠')).toBeInTheDocument();
   });
 
   it('인증 실패 시 쿠키 클리어 경유로 /login으로 리다이렉트한다', async () => {
-    mockCheckAuthStatus.mockResolvedValue({ authenticated: false, user: null });
+    let resolveAuthStatus: (value: {
+      authenticated: boolean;
+      user: null;
+    }) => void;
+    mockCheckAuthStatus.mockReturnValue(
+      new Promise((resolve) => {
+        resolveAuthStatus = resolve;
+      }),
+    );
+
     render(
       <AuthGuard>
         <div>보호된 콘텐츠</div>
       </AuthGuard>,
     );
 
-    await vi.waitFor(() => {
-      expect(window.location.href).toBe('/api/auth/logout');
+    await act(async () => {
+      resolveAuthStatus!({ authenticated: false, user: null });
     });
+
+    expect(window.location.href).toBe('/api/auth/logout');
   });
 });

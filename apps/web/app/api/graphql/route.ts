@@ -20,16 +20,38 @@ function getProxyHeaders(request: NextRequest): Record<string, string> {
     headers.cookie = cookie;
   }
 
+  const forwardedFor = request.headers.get('x-forwarded-for');
+  if (forwardedFor) {
+    headers['x-forwarded-for'] = forwardedFor;
+  }
+
+  const realIp = request.headers.get('x-real-ip');
+  if (realIp) {
+    headers['x-real-ip'] = realIp;
+  }
+
   return headers;
+}
+
+function getSetCookieHeaders(upstream: Response): string[] {
+  const headers = upstream.headers as Headers & {
+    getSetCookie?: () => string[];
+  };
+
+  if (typeof headers.getSetCookie === 'function') {
+    return headers.getSetCookie();
+  }
+
+  const setCookie = upstream.headers.get('set-cookie');
+  return setCookie ? [setCookie] : [];
 }
 
 function copySetCookieHeader(
   upstream: Response,
   downstream: NextResponse,
 ): void {
-  const setCookie = upstream.headers.get('set-cookie');
-  if (setCookie) {
-    downstream.headers.set('set-cookie', setCookie);
+  for (const setCookie of getSetCookieHeaders(upstream)) {
+    downstream.headers.append('set-cookie', setCookie);
   }
 }
 

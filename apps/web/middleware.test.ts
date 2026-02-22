@@ -77,7 +77,7 @@ describe('middleware', () => {
       );
     });
 
-    it('프록시 헤더가 있으면 리다이렉트에 전달된 origin을 사용한다', () => {
+    it('프록시 헤더가 있어도 요청 URL origin으로 리다이렉트한다', () => {
       const request = createRequest('/me', false, {
         host: 'pi5.dab-hadar.ts.net',
         proto: 'https',
@@ -86,7 +86,7 @@ describe('middleware', () => {
 
       expect(response.status).toBe(307);
       expect(response.headers.get('location')).toBe(
-        'https://pi5.dab-hadar.ts.net/login',
+        'http://localhost:3000/login',
       );
     });
 

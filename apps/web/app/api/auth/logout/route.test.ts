@@ -15,7 +15,7 @@ describe('GET /api/auth/logout', () => {
     expect(response.headers.get('set-cookie')).toContain('Max-Age=0');
   });
 
-  it('x-forwarded-host/proto 헤더가 있으면 해당 origin으로 리다이렉트한다', () => {
+  it('x-forwarded-host/proto 헤더가 있어도 요청 URL origin으로 리다이렉트한다', () => {
     const request = new NextRequest('http://localhost:3000/api/auth/logout', {
       headers: {
         'x-forwarded-host': 'pi5.dab-hadar.ts.net',
@@ -27,7 +27,7 @@ describe('GET /api/auth/logout', () => {
 
     expect(response.status).toBe(307);
     expect(response.headers.get('location')).toBe(
-      'https://pi5.dab-hadar.ts.net/login',
+      'http://localhost:3000/login',
     );
   });
 });

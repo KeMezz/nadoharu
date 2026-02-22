@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SignUpForm } from './SignUpForm';
 
@@ -98,7 +98,9 @@ describe('SignUpForm', () => {
 
     expect(screen.getByRole('button')).toBeDisabled();
 
-    resolveCreate!({ data: { createUser: { id: '1' } } });
+    await act(async () => {
+      resolveCreate!({ data: { createUser: { id: '1' } } });
+    });
   });
 
   it('회원가입 성공 시 /login으로 이동한다', async () => {

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { LoginForm } from './LoginForm';
 
@@ -90,7 +90,9 @@ describe('LoginForm', () => {
 
     expect(screen.getByRole('button', { name: /로그인 중/i })).toBeDisabled();
 
-    resolveLogin!({ data: { login: { user: { id: '1' } } } });
+    await act(async () => {
+      resolveLogin!({ data: { login: { user: { id: '1' } } } });
+    });
   });
 
   it('로그인 성공 시 /me로 이동한다', async () => {
