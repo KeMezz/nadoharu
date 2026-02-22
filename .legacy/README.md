@@ -10,7 +10,6 @@
 ## 사용 방법
 
 ```bash
-mkdir -p .legacy
 git clone https://github.com/GuitarCoders/nadoharu-front .legacy/nadoharu-front
 ```
 
