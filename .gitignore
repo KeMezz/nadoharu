@@ -30,3 +30,7 @@ test-results/
 
 # omc
 .omc/
+
+# local legacy references (frontend design migration)
+.legacy/*
+!.legacy/README.md
