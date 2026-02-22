@@ -3,11 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 const DEFAULT_GRAPHQL_UPSTREAM_URL = 'http://localhost:3001/graphql';
 
 function getUpstreamUrl(): string {
-  return (
-    process.env.GRAPHQL_UPSTREAM_URL ??
-    process.env.NEXT_PUBLIC_GRAPHQL_URL ??
-    DEFAULT_GRAPHQL_UPSTREAM_URL
-  );
+  return process.env.GRAPHQL_UPSTREAM_URL ?? DEFAULT_GRAPHQL_UPSTREAM_URL;
 }
 
 function getProxyHeaders(request: NextRequest): Record<string, string> {
@@ -18,16 +14,6 @@ function getProxyHeaders(request: NextRequest): Record<string, string> {
   const cookie = request.headers.get('cookie');
   if (cookie) {
     headers.cookie = cookie;
-  }
-
-  const forwardedFor = request.headers.get('x-forwarded-for');
-  if (forwardedFor) {
-    headers['x-forwarded-for'] = forwardedFor;
-  }
-
-  const realIp = request.headers.get('x-real-ip');
-  if (realIp) {
-    headers['x-real-ip'] = realIp;
   }
 
   return headers;

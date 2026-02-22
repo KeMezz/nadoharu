@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { resolveCorsOrigin } from './main.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -13,8 +14,7 @@ async function bootstrap() {
   }
 
   app.enableCors({
-    origin:
-      process.env.NODE_ENV === 'production' ? process.env.CORS_ORIGIN : true,
+    origin: resolveCorsOrigin(process.env),
     credentials: true,
   });
 

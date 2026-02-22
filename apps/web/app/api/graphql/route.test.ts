@@ -61,7 +61,7 @@ describe('POST /api/graphql', () => {
     await expect(response.json()).resolves.toEqual(upstreamPayload);
   });
 
-  it('x-forwarded-for 헤더를 upstream GraphQL로 전달한다', async () => {
+  it('x-forwarded-for 헤더를 클라이언트 입력 그대로 upstream에 전달하지 않는다', async () => {
     vi.mocked(fetch).mockResolvedValue(
       new Response(JSON.stringify({ data: {} }), {
         status: 200,
@@ -85,10 +85,35 @@ describe('POST /api/graphql', () => {
     expect(fetch).toHaveBeenCalledWith(
       DEFAULT_UPSTREAM_URL,
       expect.objectContaining({
-        headers: expect.objectContaining({
+        headers: expect.not.objectContaining({
           'x-forwarded-for': '203.0.113.10',
         }),
       }),
+    );
+  });
+
+  it('NEXT_PUBLIC_GRAPHQL_URL이 있어도 서버 프록시는 기본 upstream 주소를 사용한다', async () => {
+    process.env.NEXT_PUBLIC_GRAPHQL_URL = 'https://public.example.com/graphql';
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(JSON.stringify({ data: {} }), {
+        status: 200,
+        headers: {
+          'content-type': 'application/json',
+        },
+      }),
+    );
+
+    const request = new NextRequest('http://localhost:3000/api/graphql', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ query: '{ __typename }' }),
+    });
+
+    await POST(request);
+
+    expect(fetch).toHaveBeenCalledWith(
+      DEFAULT_UPSTREAM_URL,
+      expect.any(Object),
     );
   });
 

@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { checkAuthStatus } from '@/lib/auth-session';
 
 interface AuthGuardProps {
@@ -9,7 +8,6 @@ interface AuthGuardProps {
 }
 
 export function AuthGuard({ children }: AuthGuardProps) {
-  const router = useRouter();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,7 +18,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
         window.location.href = '/api/auth/logout';
       }
     });
-  }, [router]);
+  }, []);
 
   if (loading) {
     return (

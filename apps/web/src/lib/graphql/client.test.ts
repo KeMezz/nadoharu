@@ -77,6 +77,29 @@ describe('graphqlClient', () => {
     expect(result).toEqual(mockData);
   });
 
+  it('비정상 HTTP에서 JSON이 아닌 응답이면 NETWORK_ERROR를 반환한다', async () => {
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(
+        '<!doctype html><html><body>Service Unavailable</body></html>',
+        {
+          status: 503,
+          headers: { 'content-type': 'text/html; charset=utf-8' },
+        },
+      ),
+    );
+
+    const result = await graphqlClient('query { me { id } }');
+
+    expect(result).toEqual({
+      errors: [
+        {
+          message: 'NETWORK_ERROR',
+          extensions: { code: 'NETWORK_ERROR' },
+        },
+      ],
+    });
+  });
+
   it('네트워크 오류 시 예외를 전파한다', async () => {
     vi.mocked(fetch).mockRejectedValue(new Error('Network error'));
 

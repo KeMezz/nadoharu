@@ -7,10 +7,6 @@ vi.mock('@/lib/auth-session', () => ({
   checkAuthStatus: () => mockCheckAuthStatus(),
 }));
 
-vi.mock('next/navigation', () => ({
-  useRouter: () => ({ push: vi.fn() }),
-}));
-
 describe('AuthGuard', () => {
   const originalLocation = window.location;
 
@@ -76,6 +72,43 @@ describe('AuthGuard', () => {
     });
 
     expect(screen.getByText('보호된 콘텐츠')).toBeInTheDocument();
+  });
+
+  it('인증 성공 시 인증 확인을 한 번만 수행한다', async () => {
+    let resolveAuthStatus: (value: {
+      authenticated: boolean;
+      user: {
+        id: string;
+        accountId: string;
+        email: string;
+        name: string;
+      } | null;
+    }) => void;
+    mockCheckAuthStatus.mockReturnValue(
+      new Promise((resolve) => {
+        resolveAuthStatus = resolve;
+      }),
+    );
+
+    render(
+      <AuthGuard>
+        <div>보호된 콘텐츠</div>
+      </AuthGuard>,
+    );
+
+    await act(async () => {
+      resolveAuthStatus!({
+        authenticated: true,
+        user: {
+          id: '1',
+          accountId: 'testuser',
+          email: 'test@example.com',
+          name: 'Test',
+        },
+      });
+    });
+
+    expect(mockCheckAuthStatus).toHaveBeenCalledTimes(1);
   });
 
   it('인증 실패 시 쿠키 클리어 경유로 /login으로 리다이렉트한다', async () => {

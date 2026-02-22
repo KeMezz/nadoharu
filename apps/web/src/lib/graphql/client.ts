@@ -20,5 +20,17 @@ export async function graphqlClient<T = unknown>(
     body: JSON.stringify(body),
   });
 
+  const contentType = response.headers.get('content-type') ?? '';
+  if (!response.ok && !contentType.toLowerCase().includes('application/json')) {
+    return {
+      errors: [
+        {
+          message: 'NETWORK_ERROR',
+          extensions: { code: 'NETWORK_ERROR' },
+        },
+      ],
+    };
+  }
+
   return response.json();
 }
