@@ -31,3 +31,17 @@
 
 - **WHEN** `accessToken` 쿠키가 만료되었거나 무효여서 `me` 조회가 실패한다
 - **THEN** 시스템은 비인증 상태로 전환하고 로그인 흐름으로 이동한다
+
+### Requirement: 인증 관련 요청은 쿠키 전송이 보장되는 방식으로 호출되어야 한다
+
+시스템은 `login` 및 후속 인증 확인 요청(`me`)에서 브라우저 쿠키 전송이 보장되도록 credentialed request를 사용해야 한다(MUST). 오리진이 분리된 환경(예: `localhost:3000` 웹, `localhost:3001` API)에서도 쿠키 저장/전송이 동작해야 한다(MUST).
+
+#### Scenario: 분리 오리진 환경에서 로그인 쿠키 저장
+
+- **WHEN** 사용자가 `localhost:3000` 웹에서 `localhost:3001` API로 로그인 요청을 보낸다
+- **THEN** 시스템은 credentialed request 설정으로 `Set-Cookie`를 저장하고 후속 인증 요청에 쿠키를 포함한다
+
+#### Scenario: 분리 오리진 환경에서 me 인증 확인
+
+- **WHEN** 분리 오리진 환경에서 보호 화면 진입 시 `me` 요청을 보낸다
+- **THEN** 시스템은 쿠키를 포함한 요청으로 사용자 인증 상태를 정상 확인한다

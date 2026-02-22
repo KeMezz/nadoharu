@@ -7,7 +7,7 @@
 #### Scenario: 로그인 폼 제출 성공
 
 - **WHEN** 사용자가 올바른 `accountId`와 `password`를 입력하고 제출한다
-- **THEN** 시스템은 `login(input)` 호출을 수행하고 성공 시 보호 영역 기본 진입 페이지로 이동한다
+- **THEN** 시스템은 `login(input)` 호출을 수행하고 성공 시 보호 영역 기본 진입 페이지(`/me`)로 이동한다
 
 #### Scenario: 필수 입력 누락
 

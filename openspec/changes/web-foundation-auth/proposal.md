@@ -7,7 +7,7 @@
 - **인증 화면 기반 구축**: 레거시 로그인/회원가입 UI 톤을 유지하면서 `apps/web`에 인증 화면 흐름을 구축
 - **인증 계약 정렬**: GraphQL 인증 연동을 현재 API 기준으로 정렬 (`createUser(input)`, `login(input)`, `me`)
 - **세션 전략 표준화**: 프론트 인증 상태를 JWT 문자열 직접 저장 방식이 아니라 httpOnly `accessToken` 쿠키 기반으로 통일
-- **라우트 접근 정책 정의**: 공개 전용 라우트(`/login`, `/sign-up`)와 보호 라우트(`/posts`, `/me` 등) 리다이렉트 규칙 명시
+- **라우트 접근 정책 정의**: 공개 전용 라우트(`/login`, `/sign-up`)와 보호 라우트(`/posts`, `/me` 등) 리다이렉트 규칙 명시 (`/me`를 auth 기본 진입점으로 사용)
 - **인증 에러 UX 통일**: `INVALID_CREDENTIALS`, `ACCOUNT_TEMPORARILY_LOCKED`, `UNAUTHORIZED` 등 인증 에러 표시 규칙 정립
 - **소셜 버튼 처리 방침**: Apple/Kakao/GitHub 버튼은 외관만 제공하고 비활성 상태로 노출
 - **범위 제외**: Apple/Kakao/GitHub 소셜 로그인 인증 연동(실제 동작) 및 도메인 기능(post/comment/friend/chat/notification) 화면 구현은 별도 change에서 진행
