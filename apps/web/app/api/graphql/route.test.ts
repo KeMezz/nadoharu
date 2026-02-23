@@ -92,6 +92,75 @@ describe('POST /api/graphql', () => {
     );
   });
 
+  it('플랫폼 제공 원본 IP 헤더를 upstream으로 전달한다', async () => {
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(JSON.stringify({ data: {} }), {
+        status: 200,
+        headers: {
+          'content-type': 'application/json',
+        },
+      }),
+    );
+
+    const request = new NextRequest('http://localhost:3000/api/graphql', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-vercel-forwarded-for': '198.51.100.42, 198.51.100.43',
+        'x-forwarded-for': '203.0.113.10',
+      },
+      body: JSON.stringify({ query: '{ __typename }' }),
+    });
+
+    await POST(request);
+
+    expect(fetch).toHaveBeenCalledWith(
+      DEFAULT_UPSTREAM_URL,
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          'x-forwarded-for': '198.51.100.42',
+          'x-real-ip': '198.51.100.42',
+        }),
+      }),
+    );
+  });
+
+  it('request.ip가 있으면 플랫폼 헤더보다 우선해 upstream으로 전달한다', async () => {
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(JSON.stringify({ data: {} }), {
+        status: 200,
+        headers: {
+          'content-type': 'application/json',
+        },
+      }),
+    );
+
+    const request = new NextRequest('http://localhost:3000/api/graphql', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-vercel-forwarded-for': '198.51.100.42',
+      },
+      body: JSON.stringify({ query: '{ __typename }' }),
+    });
+    Object.defineProperty(request, 'ip', {
+      value: '192.0.2.24',
+      configurable: true,
+    });
+
+    await POST(request);
+
+    expect(fetch).toHaveBeenCalledWith(
+      DEFAULT_UPSTREAM_URL,
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          'x-forwarded-for': '192.0.2.24',
+          'x-real-ip': '192.0.2.24',
+        }),
+      }),
+    );
+  });
+
   it('NEXT_PUBLIC_GRAPHQL_URL이 있어도 서버 프록시는 기본 upstream 주소를 사용한다', async () => {
     process.env.NEXT_PUBLIC_GRAPHQL_URL = 'https://public.example.com/graphql';
     vi.mocked(fetch).mockResolvedValue(
