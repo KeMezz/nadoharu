@@ -1,4 +1,4 @@
-import { graphqlClient, type GraphQLResponse } from '@/lib/graphql/client';
+import { graphqlClient, type GraphQLResponse } from '@/lib/graphql';
 import type {
   CreateUserMutation,
   CreateUserMutationVariables,

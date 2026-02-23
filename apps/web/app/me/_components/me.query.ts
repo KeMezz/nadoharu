@@ -1,4 +1,4 @@
-import { graphqlClient, type GraphQLResponse } from '@/lib/graphql/client';
+import { graphqlClient, type GraphQLResponse } from '@/lib/graphql';
 import type { MeQuery } from './me.generated';
 import meQueryDocument from './me.graphql';
 
