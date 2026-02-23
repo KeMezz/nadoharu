@@ -1,16 +1,17 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { resolveCorsOrigin } from './main.config';
+import { resolveCorsOrigin, resolveTrustProxy } from './main.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  if (process.env.NODE_ENV === 'production') {
+  const trustProxyHops = resolveTrustProxy(process.env);
+  if (trustProxyHops !== null) {
     const httpAdapter = app.getHttpAdapter();
     const instance = httpAdapter.getInstance() as {
       set?: (...args: unknown[]) => void;
     };
-    instance.set?.('trust proxy', 1);
+    instance.set?.('trust proxy', trustProxyHops);
   }
 
   app.enableCors({
