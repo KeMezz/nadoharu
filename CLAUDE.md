@@ -34,8 +34,11 @@ pnpm --filter api test          # 백엔드 테스트만
 pnpm --filter api test:watch    # 백엔드 테스트 watch 모드
 pnpm --filter api test:cov      # 백엔드 테스트 커버리지
 pnpm --filter api test:integration # 백엔드 통합 테스트
+pnpm --filter api graphql:schema # API GraphQL 스키마 파일 생성
 pnpm --filter web test          # 프론트엔드 테스트만
 pnpm --filter web test:watch    # 프론트엔드 테스트 watch 모드
+pnpm --filter web graphql:codegen # Web GraphQL 타입 생성
+pnpm --filter web graphql:generate # API 스키마 생성 + Web 타입 생성
 
 # 인프라
 docker compose up -d            # PostgreSQL 시작 (localhost:5432)
@@ -74,6 +77,17 @@ docker compose ps               # 컨테이너 상태 확인
 - 레거시 코드는 디자인/인터랙션 참고용으로만 사용하고, 데이터 계약/GraphQL/라우팅/상태 관리는 현재 모노레포 기준으로 재작성한다(MUST).
 - PR/스펙/문서에 로컬 절대 경로(예: `/home/...`)를 기록하면 안 된다(MUST NOT). 일반 레퍼런스는 `nadoharu-front`와 같은 명칭을 사용하되, 온보딩 목적의 `.legacy/README.md`에는 공식 저장소 URL을 명시할 수 있다.
 - 이 규칙은 프론트엔드 디자인 이식 완료 시점까지 한시적으로 운영하며, 완료 후 제거/완화를 검토한다.
+
+### 프론트엔드 GraphQL/폼 콜로케이션 규칙
+
+- 기본 단위는 **도메인(auth)**가 아니라 **라우트(app 경로)**이다. 각 페이지 관련 코드는 `app/<route>/_components`에 콜로케이션한다(MUST).
+- 폼은 `page.tsx` 옆에 `<FormName>.tsx`, `use<FormName>Form.ts`, `<FormName>.test.tsx`를 함께 둔다(MUST).
+- 특정 컴포넌트 전용 하위 UI는 `<ComponentName>/_components/*`로 중첩해 배치한다(MUST).
+- GraphQL 문서는 실행 파일에 인라인으로 작성하지 않고 인접 `*.graphql` 파일로 분리한다(MUST). 예: `login.mutation.ts` + `login.graphql`.
+- GraphQL 타입은 수동 `types.ts`로 관리하지 않고, `near-operation-file` 패턴으로 생성된 인접 `*.generated.ts`를 사용한다(MUST).
+- 스키마 공통 타입은 `graphql:generate`로 생성된 `src/lib/graphql/generated.ts`를 베이스 타입으로 사용한다(MUST).
+- UI와 무관한 요청/에러 매핑/리다이렉트 로직은 폼 훅(`use<FormName>Form`) 또는 라우트 내부 쿼리/뮤테이션 모듈(`*.query.ts`, `*.mutation.ts`)로 분리한다(MUST).
+- 재사용이 2개 이상 라우트에서 확인되면 해당 코드를 `src` 하위 공용 모듈로 승격한다(SHOULD).
 
 ### PR과 Change는 작게 유지
 
@@ -117,6 +131,25 @@ chore: 프로젝트 초기 설정
 - OpenCode에서는 커스텀 워크플로우를 skill보다 command 우선으로 관리
 
 ## 아키텍처
+
+### 프론트엔드 (apps/web) — Route-first Colocation
+
+```text
+app/
+├── login/
+│   ├── page.tsx
+│   └── _components/
+│       ├── LoginForm.tsx
+│       ├── useLoginForm.ts
+│       ├── login.mutation.ts
+│       ├── login.graphql
+│       ├── login.generated.ts
+│       └── LoginForm/_components/*
+├── sign-up/
+│   └── _components/
+└── me/
+    └── _components/
+```
 
 ### 백엔드 (apps/api) — DDD/Clean Architecture
 

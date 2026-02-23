@@ -4,12 +4,13 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { Request, Response } from 'express';
 import { AuthModule } from './bounded-contexts/auth/infrastructure/auth.module';
 import { formatGraphQLError } from './common/graphql/format-graphql-error';
+import { resolveGraphqlSchemaFilePath } from './common/graphql/graphql-schema-path';
 
 @Module({
   imports: [
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: true,
+      autoSchemaFile: resolveGraphqlSchemaFilePath(),
       context: ({ req, res }: { req: Request; res: Response }) => ({
         req,
         res,
