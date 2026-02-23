@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { ReactNode } from 'react';
 import MePage from './page';
 
-vi.mock('@/components/auth/AuthGuard', () => ({
+vi.mock('./_components/AuthGuard', () => ({
   AuthGuard: ({ children }: { children: ReactNode }) => <>{children}</>,
 }));
 

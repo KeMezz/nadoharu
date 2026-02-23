@@ -1,11 +1,12 @@
 import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { LoginForm } from './LoginForm';
 
 const mockLogin = vi.fn();
 const mockShowToast = vi.fn();
 
-vi.mock('@/lib/graphql/auth', () => ({
+vi.mock('./login.mutation', () => ({
   login: (...args: unknown[]) => mockLogin(...args),
 }));
 

@@ -1,0 +1,7 @@
+import { graphqlClient, type GraphQLResponse } from '@/lib/graphql/client';
+import type { MeQuery } from '@/lib/graphql/generated';
+import meQueryDocument from './me.graphql';
+
+export function fetchMe(): Promise<GraphQLResponse<MeQuery>> {
+  return graphqlClient(meQueryDocument.trim());
+}

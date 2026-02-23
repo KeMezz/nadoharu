@@ -1,8 +1,9 @@
-import { checkAuthStatus } from './auth-session';
+import { checkAuthStatus } from './checkAuthStatus';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 const mockFetchMe = vi.fn();
 
-vi.mock('@/lib/graphql/auth', () => ({
+vi.mock('./me.query', () => ({
   fetchMe: () => mockFetchMe(),
 }));
 
@@ -12,7 +13,12 @@ describe('checkAuthStatus', () => {
   });
 
   it('me 조회 성공 시 사용자 정보를 반환한다', async () => {
-    const user = { id: '1', accountId: 'testuser', email: 'test@example.com', name: 'Test' };
+    const user = {
+      id: '1',
+      accountId: 'testuser',
+      email: 'test@example.com',
+      name: 'Test',
+    };
     mockFetchMe.mockResolvedValue({ data: { me: user } });
 
     const result = await checkAuthStatus();
@@ -22,7 +28,9 @@ describe('checkAuthStatus', () => {
 
   it('me 조회 실패 시 비인증 상태를 반환한다', async () => {
     mockFetchMe.mockResolvedValue({
-      errors: [{ message: 'UNAUTHORIZED', extensions: { code: 'UNAUTHORIZED' } }],
+      errors: [
+        { message: 'UNAUTHORIZED', extensions: { code: 'UNAUTHORIZED' } },
+      ],
     });
 
     const result = await checkAuthStatus();
@@ -39,7 +47,12 @@ describe('checkAuthStatus', () => {
   });
 
   it('localStorage나 sessionStorage에 토큰을 저장하지 않는다', async () => {
-    const user = { id: '1', accountId: 'testuser', email: 'test@example.com', name: 'Test' };
+    const user = {
+      id: '1',
+      accountId: 'testuser',
+      email: 'test@example.com',
+      name: 'Test',
+    };
     mockFetchMe.mockResolvedValue({ data: { me: user } });
 
     const setItemSpy = vi.spyOn(Storage.prototype, 'setItem');

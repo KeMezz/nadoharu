@@ -1,44 +1,40 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-import { createUser } from '@/lib/graphql/auth';
+import { login } from './login.mutation';
 import { getAuthErrorMessage } from '@/lib/auth-errors';
 import { useToast } from '@/components/providers/ToastProvider';
 
-interface UseSignUpFormResult {
+interface UseLoginFormResult {
   pending: boolean;
   error: string | null;
-  handleSubmit: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
+  handleSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
 }
 
-export function useSignUpForm(): UseSignUpFormResult {
+export function useLoginForm(): UseLoginFormResult {
   const router = useRouter();
   const { showToast } = useToast();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
 
     const formData = new FormData(event.currentTarget);
     const accountId = (formData.get('accountId') as string).trim();
     const password = formData.get('password') as string;
-    const email = (formData.get('email') as string).trim();
-    const name = (formData.get('name') as string).trim();
 
-    if (!accountId || !password || !email || !name) {
+    if (!accountId || !password) {
       return;
     }
 
     setPending(true);
     try {
-      const result = await createUser({ accountId, password, email, name });
+      const result = await login({ accountId, password });
 
-      if (result.data?.createUser) {
-        showToast('회원가입이 완료되었습니다. 로그인해 주세요.', {
-          tone: 'success',
-        });
-        router.push('/login');
+      if (result.data?.login) {
+        showToast('로그인되었습니다.', { tone: 'success' });
+        router.push('/me');
         return;
       }
 

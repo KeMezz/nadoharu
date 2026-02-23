@@ -1,5 +1,5 @@
-import { fetchMe } from '@/lib/graphql/auth';
 import type { MeQuery } from '@/lib/graphql/generated';
+import { fetchMe } from './me.query';
 
 type AuthenticatedUser = NonNullable<MeQuery['me']>;
 

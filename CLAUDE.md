@@ -80,10 +80,13 @@ docker compose ps               # 컨테이너 상태 확인
 
 ### 프론트엔드 GraphQL/폼 콜로케이션 규칙
 
-- GraphQL 문서는 실행 함수 파일에 인라인으로 작성하지 않고, 인접한 별도 `*.graphql` 파일(예: `auth.graphql`)로 분리한다(MUST).
+- 기본 단위는 **도메인(auth)**가 아니라 **라우트(app 경로)**이다. 각 페이지 관련 코드는 `app/<route>/_components`에 콜로케이션한다(MUST).
+- 폼은 `page.tsx` 옆에 `<FormName>.tsx`, `use<FormName>Form.ts`, `<FormName>.test.tsx`를 함께 둔다(MUST).
+- 특정 컴포넌트 전용 하위 UI는 `<ComponentName>/_components/*`로 중첩해 배치한다(MUST).
+- GraphQL 문서는 실행 파일에 인라인으로 작성하지 않고 인접 `*.graphql` 파일로 분리한다(MUST). 예: `login.mutation.ts` + `login.graphql`.
 - GraphQL 타입은 수동 `types.ts`로 관리하지 않고, `graphql:generate`로 생성한 `src/lib/graphql/generated.ts`를 사용한다(MUST).
-- 폼 컴포넌트는 렌더링과 UI 이벤트 바인딩만 담당하고, UI와 무관한 비즈니스 로직(요청/에러 매핑/리다이렉트)은 `use<FormName>Form` 훅으로 분리한다(MUST).
-- 로그인/회원가입 등 동일 도메인 폼은 각 폼별 훅과 테스트를 같은 디렉터리에 콜로케이션한다(MUST).
+- UI와 무관한 요청/에러 매핑/리다이렉트 로직은 폼 훅(`use<FormName>Form`) 또는 라우트 내부 쿼리/뮤테이션 모듈(`*.query.ts`, `*.mutation.ts`)로 분리한다(MUST).
+- 재사용이 2개 이상 라우트에서 확인되면 해당 코드를 `src` 하위 공용 모듈로 승격한다(SHOULD).
 
 ### PR과 Change는 작게 유지
 
@@ -127,6 +130,24 @@ chore: 프로젝트 초기 설정
 - OpenCode에서는 커스텀 워크플로우를 skill보다 command 우선으로 관리
 
 ## 아키텍처
+
+### 프론트엔드 (apps/web) — Route-first Colocation
+
+```text
+app/
+├── login/
+│   ├── page.tsx
+│   └── _components/
+│       ├── LoginForm.tsx
+│       ├── useLoginForm.ts
+│       ├── login.mutation.ts
+│       ├── login.graphql
+│       └── LoginForm/_components/*
+├── sign-up/
+│   └── _components/
+└── me/
+    └── _components/
+```
 
 ### 백엔드 (apps/api) — DDD/Clean Architecture
 

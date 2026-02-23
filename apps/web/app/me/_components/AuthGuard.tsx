@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { checkAuthStatus } from '@/lib/auth-session';
+import { checkAuthStatus } from './checkAuthStatus';
 
 interface AuthGuardProps {
   children: React.ReactNode;

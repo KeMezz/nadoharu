@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { LoginForm } from '@/components/auth/LoginForm';
-import { SocialLoginButtons } from '@/components/auth/SocialLoginButtons';
+import { LoginForm } from './_components/LoginForm';
+import { SocialLoginButtons } from './_components/LoginForm/_components/SocialLoginButtons';
 
 export default function LoginPage() {
   return (
