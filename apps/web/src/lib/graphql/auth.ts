@@ -1,12 +1,12 @@
-import { graphqlClient } from './client';
+import { graphqlClient, type GraphQLResponse } from './client';
 import authDocuments from './auth.graphql';
 import type {
-  AuthPayload,
-  CreateUserInput,
-  GraphQLResponse,
-  LoginInput,
-  User,
-} from './types';
+  CreateUserMutation,
+  CreateUserMutationVariables,
+  LoginMutation,
+  LoginMutationVariables,
+  MeQuery,
+} from './generated';
 
 function readOperationDocument(marker: string): string {
   const markerToken = `# -- ${marker} --`;
@@ -29,17 +29,17 @@ const CREATE_USER_MUTATION = readOperationDocument('CREATE_USER_MUTATION');
 const ME_QUERY = readOperationDocument('ME_QUERY');
 
 export function login(
-  input: LoginInput,
-): Promise<GraphQLResponse<{ login: AuthPayload }>> {
+  input: LoginMutationVariables['input'],
+): Promise<GraphQLResponse<LoginMutation>> {
   return graphqlClient(LOGIN_MUTATION, { input });
 }
 
 export function createUser(
-  input: CreateUserInput,
-): Promise<GraphQLResponse<{ createUser: User }>> {
+  input: CreateUserMutationVariables['input'],
+): Promise<GraphQLResponse<CreateUserMutation>> {
   return graphqlClient(CREATE_USER_MUTATION, { input });
 }
 
-export function fetchMe(): Promise<GraphQLResponse<{ me: User }>> {
+export function fetchMe(): Promise<GraphQLResponse<MeQuery>> {
   return graphqlClient(ME_QUERY);
 }

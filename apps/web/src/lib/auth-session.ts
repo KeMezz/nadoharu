@@ -1,9 +1,11 @@
 import { fetchMe } from '@/lib/graphql/auth';
-import type { User } from '@/lib/graphql/types';
+import type { MeQuery } from '@/lib/graphql/generated';
+
+type AuthenticatedUser = NonNullable<MeQuery['me']>;
 
 export interface AuthStatus {
   authenticated: boolean;
-  user: User | null;
+  user: AuthenticatedUser | null;
 }
 
 export async function checkAuthStatus(): Promise<AuthStatus> {

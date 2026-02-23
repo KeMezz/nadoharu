@@ -1,13 +1,24 @@
-import type { GraphQLResponse } from './types';
+export interface GraphQLError {
+  message: string;
+  extensions?: {
+    code?: string;
+    [key: string]: unknown;
+  };
+}
+
+export interface GraphQLResponse<TData> {
+  data?: TData;
+  errors?: GraphQLError[];
+}
 
 function getGraphQLUrl(): string {
   return '/api/graphql';
 }
 
-export async function graphqlClient<T = unknown>(
+export async function graphqlClient<TData = unknown>(
   query: string,
   variables?: Record<string, unknown>,
-): Promise<GraphQLResponse<T>> {
+): Promise<GraphQLResponse<TData>> {
   const body: Record<string, unknown> = { query };
   if (variables) {
     body.variables = variables;

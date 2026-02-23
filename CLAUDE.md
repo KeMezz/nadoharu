@@ -34,8 +34,11 @@ pnpm --filter api test          # 백엔드 테스트만
 pnpm --filter api test:watch    # 백엔드 테스트 watch 모드
 pnpm --filter api test:cov      # 백엔드 테스트 커버리지
 pnpm --filter api test:integration # 백엔드 통합 테스트
+pnpm --filter api graphql:schema # API GraphQL 스키마 파일 생성
 pnpm --filter web test          # 프론트엔드 테스트만
 pnpm --filter web test:watch    # 프론트엔드 테스트 watch 모드
+pnpm --filter web graphql:codegen # Web GraphQL 타입 생성
+pnpm --filter web graphql:generate # API 스키마 생성 + Web 타입 생성
 
 # 인프라
 docker compose up -d            # PostgreSQL 시작 (localhost:5432)
@@ -78,6 +81,7 @@ docker compose ps               # 컨테이너 상태 확인
 ### 프론트엔드 GraphQL/폼 콜로케이션 규칙
 
 - GraphQL 문서는 실행 함수 파일에 인라인으로 작성하지 않고, 인접한 별도 `*.graphql` 파일(예: `auth.graphql`)로 분리한다(MUST).
+- GraphQL 타입은 수동 `types.ts`로 관리하지 않고, `graphql:generate`로 생성한 `src/lib/graphql/generated.ts`를 사용한다(MUST).
 - 폼 컴포넌트는 렌더링과 UI 이벤트 바인딩만 담당하고, UI와 무관한 비즈니스 로직(요청/에러 매핑/리다이렉트)은 `use<FormName>Form` 훅으로 분리한다(MUST).
 - 로그인/회원가입 등 동일 도메인 폼은 각 폼별 훅과 테스트를 같은 디렉터리에 콜로케이션한다(MUST).
 
