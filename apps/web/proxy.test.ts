@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { middleware } from './middleware';
+import { proxy } from './proxy';
 
 interface ForwardedOrigin {
   host: string;
@@ -23,11 +23,11 @@ function createRequest(
   return new NextRequest(url, { headers });
 }
 
-describe('middleware', () => {
+describe('proxy', () => {
   describe('공개 전용 라우트 (/login, /sign-up)', () => {
     it('인증 사용자가 /login에 접근하면 /me로 리다이렉트한다', () => {
       const request = createRequest('/login', true);
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(response.status).toBe(307);
       expect(new URL(response.headers.get('location')!).pathname).toBe('/me');
@@ -35,7 +35,7 @@ describe('middleware', () => {
 
     it('인증 사용자가 /sign-up에 접근하면 /me로 리다이렉트한다', () => {
       const request = createRequest('/sign-up', true);
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(response.status).toBe(307);
       expect(new URL(response.headers.get('location')!).pathname).toBe('/me');
@@ -43,14 +43,14 @@ describe('middleware', () => {
 
     it('비인증 사용자가 /login에 접근하면 통과시킨다', () => {
       const request = createRequest('/login', false);
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(response.headers.get('location')).toBeNull();
     });
 
     it('비인증 사용자가 /sign-up에 접근하면 통과시킨다', () => {
       const request = createRequest('/sign-up', false);
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(response.headers.get('location')).toBeNull();
     });
@@ -59,7 +59,7 @@ describe('middleware', () => {
   describe('보호 라우트 (/me, /posts)', () => {
     it('비인증 사용자가 /me에 접근하면 /login으로 리다이렉트한다', () => {
       const request = createRequest('/me', false);
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(response.status).toBe(307);
       expect(new URL(response.headers.get('location')!).pathname).toBe(
@@ -69,7 +69,7 @@ describe('middleware', () => {
 
     it('비인증 사용자가 /posts에 접근하면 /login으로 리다이렉트한다', () => {
       const request = createRequest('/posts', false);
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(response.status).toBe(307);
       expect(new URL(response.headers.get('location')!).pathname).toBe(
@@ -82,7 +82,7 @@ describe('middleware', () => {
         host: 'pi5.dab-hadar.ts.net',
         proto: 'https',
       });
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(response.status).toBe(307);
       expect(response.headers.get('location')).toBe(
@@ -92,14 +92,14 @@ describe('middleware', () => {
 
     it('인증 사용자가 /me에 접근하면 통과시킨다', () => {
       const request = createRequest('/me', true);
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(response.headers.get('location')).toBeNull();
     });
 
     it('인증 사용자가 /posts에 접근하면 통과시킨다', () => {
       const request = createRequest('/posts', true);
-      const response = middleware(request);
+      const response = proxy(request);
 
       expect(response.headers.get('location')).toBeNull();
     });

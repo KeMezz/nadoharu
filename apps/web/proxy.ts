@@ -10,7 +10,7 @@ function createRedirectUrl(request: NextRequest, pathname: string): URL {
   return url;
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const hasToken = request.cookies.has('accessToken');
 
