@@ -1,4 +1,9 @@
 import { graphqlClient } from './client';
+import {
+  CREATE_USER_MUTATION,
+  LOGIN_MUTATION,
+  ME_QUERY,
+} from './auth.operations';
 import type {
   AuthPayload,
   CreateUserInput,
@@ -6,42 +11,6 @@ import type {
   LoginInput,
   User,
 } from './types';
-
-const LOGIN_MUTATION = `
-  mutation Login($input: LoginInput!) {
-    login(input: $input) {
-      user {
-        id
-        accountId
-        email
-        name
-      }
-    }
-  }
-`;
-
-const CREATE_USER_MUTATION = `
-  mutation CreateUser($input: CreateUserInput!) {
-    createUser(input: $input) {
-      id
-      accountId
-      email
-      name
-      createdAt
-    }
-  }
-`;
-
-const ME_QUERY = `
-  query Me {
-    me {
-      id
-      accountId
-      email
-      name
-    }
-  }
-`;
 
 export function login(
   input: LoginInput,
