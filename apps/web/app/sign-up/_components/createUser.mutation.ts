@@ -2,7 +2,7 @@ import { graphqlClient, type GraphQLResponse } from '@/lib/graphql/client';
 import type {
   CreateUserMutation,
   CreateUserMutationVariables,
-} from '@/lib/graphql/generated';
+} from './createUser.generated';
 import createUserMutationDocument from './createUser.graphql';
 
 export function createUser(

@@ -84,7 +84,8 @@ docker compose ps               # 컨테이너 상태 확인
 - 폼은 `page.tsx` 옆에 `<FormName>.tsx`, `use<FormName>Form.ts`, `<FormName>.test.tsx`를 함께 둔다(MUST).
 - 특정 컴포넌트 전용 하위 UI는 `<ComponentName>/_components/*`로 중첩해 배치한다(MUST).
 - GraphQL 문서는 실행 파일에 인라인으로 작성하지 않고 인접 `*.graphql` 파일로 분리한다(MUST). 예: `login.mutation.ts` + `login.graphql`.
-- GraphQL 타입은 수동 `types.ts`로 관리하지 않고, `graphql:generate`로 생성한 `src/lib/graphql/generated.ts`를 사용한다(MUST).
+- GraphQL 타입은 수동 `types.ts`로 관리하지 않고, `near-operation-file` 패턴으로 생성된 인접 `*.generated.ts`를 사용한다(MUST).
+- 스키마 공통 타입은 `graphql:generate`로 생성된 `src/lib/graphql/generated.ts`를 베이스 타입으로 사용한다(MUST).
 - UI와 무관한 요청/에러 매핑/리다이렉트 로직은 폼 훅(`use<FormName>Form`) 또는 라우트 내부 쿼리/뮤테이션 모듈(`*.query.ts`, `*.mutation.ts`)로 분리한다(MUST).
 - 재사용이 2개 이상 라우트에서 확인되면 해당 코드를 `src` 하위 공용 모듈로 승격한다(SHOULD).
 
@@ -142,6 +143,7 @@ app/
 │       ├── useLoginForm.ts
 │       ├── login.mutation.ts
 │       ├── login.graphql
+│       ├── login.generated.ts
 │       └── LoginForm/_components/*
 ├── sign-up/
 │   └── _components/

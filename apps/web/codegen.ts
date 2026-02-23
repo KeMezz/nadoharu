@@ -6,7 +6,21 @@ const config: CodegenConfig = {
   documents: ['app/**/*.graphql', 'src/**/*.graphql'],
   generates: {
     'src/lib/graphql/generated.ts': {
-      plugins: ['typescript', 'typescript-operations'],
+      plugins: ['typescript'],
+      config: {
+        scalars: {
+          DateTime: 'string',
+          Date: 'string',
+        },
+      },
+    },
+    '.': {
+      preset: 'near-operation-file',
+      presetConfig: {
+        extension: '.generated.ts',
+        baseTypesPath: 'src/lib/graphql/generated.ts',
+      },
+      plugins: ['typescript-operations'],
       config: {
         scalars: {
           DateTime: 'string',

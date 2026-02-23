@@ -1,4 +1,4 @@
-import type { MeQuery } from '@/lib/graphql/generated';
+import type { MeQuery } from './me.generated';
 import { fetchMe } from './me.query';
 
 type AuthenticatedUser = NonNullable<MeQuery['me']>;

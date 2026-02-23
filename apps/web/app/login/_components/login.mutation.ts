@@ -1,8 +1,5 @@
 import { graphqlClient, type GraphQLResponse } from '@/lib/graphql/client';
-import type {
-  LoginMutation,
-  LoginMutationVariables,
-} from '@/lib/graphql/generated';
+import type { LoginMutation, LoginMutationVariables } from './login.generated';
 import loginMutationDocument from './login.graphql';
 
 export function login(
