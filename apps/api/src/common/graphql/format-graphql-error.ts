@@ -8,10 +8,7 @@ export function formatGraphQLError(
   error: GraphQLFormattedError,
 ): GraphQLFormattedError {
   const codeFromExtensions = error.extensions?.code;
-  if (
-    typeof codeFromExtensions === 'string' &&
-    isAuthErrorCode(codeFromExtensions)
-  ) {
+  if (typeof codeFromExtensions === 'string' && codeFromExtensions.length > 0) {
     return error;
   }
 

@@ -19,13 +19,52 @@ type AuthPayload {
   user: User!
 }
 
+type Post {
+  id: String!
+  content: String!
+  subcontent: String
+  category: String
+  imageUrls: [String!]!
+  authorId: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type PostEdge {
+  node: Post!
+  cursor: String!
+}
+
+type PostPageInfo {
+  hasNextPage: Boolean!
+  endCursor: String
+}
+
+type PostConnection {
+  edges: [PostEdge!]!
+  pageInfo: PostPageInfo!
+}
+
+type PostImageUploadUrlPayload {
+  uploadUrl: String!
+  imageUrl: String!
+  objectKey: String!
+  expiresInSeconds: Int!
+}
+
 type Query {
   me: User!
+  post(id: String!): Post
+  posts(first: Int!, after: String, before: String, last: Int): PostConnection!
 }
 
 type Mutation {
   createUser(input: CreateUserInput!): User!
   login(input: LoginInput!): AuthPayload!
+  createPost(input: CreatePostInput!): Post!
+  updatePost(input: UpdatePostInput!): Post!
+  deletePost(input: DeletePostInput!): Boolean!
+  issuePostImageUploadUrl(input: IssuePostImageUploadUrlInput!): PostImageUploadUrlPayload!
 }
 
 input CreateUserInput {
@@ -38,4 +77,28 @@ input CreateUserInput {
 input LoginInput {
   accountId: String!
   password: String!
+}
+
+input CreatePostInput {
+  content: String
+  subcontent: String
+  category: String
+  imageUrls: [String!]
+}
+
+input UpdatePostInput {
+  id: String!
+  content: String
+  subcontent: String
+  category: String
+  imageUrls: [String!]
+}
+
+input DeletePostInput {
+  id: String!
+}
+
+input IssuePostImageUploadUrlInput {
+  contentType: String!
+  fileSize: Int!
 }

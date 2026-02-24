@@ -14,6 +14,18 @@ describe('formatGraphQLError', () => {
     expect(formatted.extensions?.code).toBe('ACCOUNT_ID_ALREADY_EXISTS');
   });
 
+  it('auth code가 아니어도 extensions.code가 있으면 그대로 유지한다', () => {
+    const error: GraphQLFormattedError = {
+      message: '게시물 수정 권한이 없습니다',
+      extensions: {
+        code: 'POST_FORBIDDEN',
+      },
+    };
+
+    const formatted = formatGraphQLError(error);
+    expect(formatted.extensions?.code).toBe('POST_FORBIDDEN');
+  });
+
   it('message가 에러 코드면 extensions.code에 매핑한다', () => {
     const error: GraphQLFormattedError = {
       message: 'INVALID_CREDENTIALS',

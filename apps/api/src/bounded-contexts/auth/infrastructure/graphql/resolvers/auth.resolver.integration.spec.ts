@@ -117,6 +117,7 @@ describe('AuthResolver (Integration)', () => {
   });
 
   beforeEach(async () => {
+    await prisma.post.deleteMany({});
     await prisma.user.deleteMany({});
     jest.restoreAllMocks();
   });
