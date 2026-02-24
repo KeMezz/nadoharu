@@ -54,6 +54,27 @@ describe('R2PostImageUploadService', () => {
     expect(getSignedUrl).toHaveBeenCalledTimes(2);
   });
 
+  it('presigned URL 서명 입력에 요청 fileSize(ContentLength)를 반영한다', async () => {
+    const service = new R2PostImageUploadService();
+
+    await service.issueUploadUrl({
+      userId: '550e8400-e29b-41d4-a716-446655440000',
+      contentType: 'image/png',
+      fileSize: 4096,
+    });
+
+    const signedCommandInput = (getSignedUrl as jest.Mock).mock.calls[0]?.[1];
+
+    expect(signedCommandInput).toMatchObject({
+      Bucket: 'nadoharu-post-images',
+      ContentType: 'image/png',
+      ContentLength: 4096,
+    });
+    expect(signedCommandInput.Key).toContain(
+      'users/550e8400-e29b-41d4-a716-446655440000/posts/',
+    );
+  });
+
   it('필수 환경변수가 없으면 생성자에서 POST_UPLOAD_NOT_CONFIGURED를 던진다', () => {
     process.env = {
       ...originalEnv,

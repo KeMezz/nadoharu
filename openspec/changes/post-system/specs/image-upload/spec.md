@@ -35,7 +35,7 @@
 
 ### Requirement: 파일 용량 제한은 이미지당 5MB를 초과할 수 없다
 
-시스템은 이미지당 최대 5MB 용량 정책을 강제해야 한다(MUST). 시스템은 URL 발급 단계에서 요청 `fileSize`가 5MB를 초과하면 거부해야 하며(MUST), presigned URL에도 5MB 상한(`Content-Length-Range`)을 적용해 스토리지 업로드 단계에서 이중으로 차단해야 한다(MUST).
+시스템은 이미지당 최대 5MB 용량 정책을 강제해야 한다(MUST). 시스템은 URL 발급 단계에서 요청 `fileSize`가 5MB를 초과하면 거부해야 하며(MUST), presigned URL 서명에 요청 `fileSize`(Content-Length)를 반영해 스토리지 업로드 단계에서도 불일치/초과 업로드를 차단해야 한다(MUST).
 
 #### Scenario: 용량 제한 이하 파일
 
@@ -47,10 +47,10 @@
 - **WHEN** 사용자가 5MB를 초과하는 이미지를 업로드하려고 한다
 - **THEN** 시스템은 검증 오류를 반환하고 업로드를 허용하지 않는다
 
-#### Scenario: 스토리지 업로드 단계의 용량 초과 차단
+#### Scenario: 스토리지 업로드 단계의 Content-Length 불일치 차단
 
 - **WHEN** 사용자가 발급된 URL로 5MB를 초과한 콘텐츠 길이로 업로드를 시도한다
-- **THEN** 스토리지 계층은 업로드를 거부한다
+- **THEN** 스토리지 계층은 서명된 Content-Length 조건 불일치로 업로드를 거부한다
 
 ### Requirement: 게시물 저장 시 발급된 허용 경로의 이미지 URL만 수용해야 한다
 

@@ -518,6 +518,53 @@ describe('PostResolver (Integration)', () => {
       expect(overlap).toHaveLength(0);
     });
 
+    it('posts 조회에서 소프트 삭제된 게시물은 제외된다', async () => {
+      const { token, userId } = await createUserAndLogin();
+
+      await prisma.post.createMany({
+        data: [
+          {
+            id: '00000000-0000-0000-0000-000000000011',
+            authorId: userId,
+            content: 'active-post',
+            subcontent: null,
+            category: null,
+            imageUrls: [],
+            createdAt: new Date('2026-02-01T00:00:00.000Z'),
+            updatedAt: new Date('2026-02-01T00:00:00.000Z'),
+            deletedAt: null,
+          },
+          {
+            id: '00000000-0000-0000-0000-000000000012',
+            authorId: userId,
+            content: 'deleted-post',
+            subcontent: null,
+            category: null,
+            imageUrls: [],
+            createdAt: new Date('2026-02-02T00:00:00.000Z'),
+            updatedAt: new Date('2026-02-02T00:00:00.000Z'),
+            deletedAt: new Date('2026-02-03T00:00:00.000Z'),
+          },
+        ],
+      });
+
+      const result = await executeGraphql<PostsPayload>({
+        query: POSTS_QUERY,
+        variables: {
+          first: 10,
+        },
+        headers: {
+          cookie: `accessToken=${token}`,
+        },
+      });
+
+      expect(result.body.errors).toBeUndefined();
+      const ids =
+        result.body.data?.posts.edges.map((edge) => edge.node.id) ?? [];
+      expect(ids).toContain('00000000-0000-0000-0000-000000000011');
+      expect(ids).not.toContain('00000000-0000-0000-0000-000000000012');
+    });
+
     it('before/last 파라미터 사용 시 UNSUPPORTED_PAGINATION_PARAM을 반환한다', async () => {
       const { token } = await createUserAndLogin();
 
@@ -547,7 +594,89 @@ describe('PostResolver (Integration)', () => {
     });
   });
 
+  describe('Validation Errors', () => {
+    it('content가 151자 이상이면 POST_CONTENT_TOO_LONG을 반환한다', async () => {
+      const { token } = await createUserAndLogin();
+
+      const result = await executeGraphql<CreatePostPayload>({
+        query: CREATE_POST_MUTATION,
+        variables: {
+          input: {
+            content: 'a'.repeat(151),
+          },
+        },
+        headers: {
+          cookie: `accessToken=${token}`,
+        },
+      });
+
+      expectGraphqlError(result.body, 'POST_CONTENT_TOO_LONG');
+    });
+
+    it('imageUrls가 5장 이상이면 POST_IMAGE_LIMIT_EXCEEDED를 반환한다', async () => {
+      const { token, userId } = await createUserAndLogin();
+
+      const result = await executeGraphql<CreatePostPayload>({
+        query: CREATE_POST_MUTATION,
+        variables: {
+          input: {
+            content: '',
+            imageUrls: [
+              `https://cdn.example.com/users/${userId}/posts/1.png`,
+              `https://cdn.example.com/users/${userId}/posts/2.png`,
+              `https://cdn.example.com/users/${userId}/posts/3.png`,
+              `https://cdn.example.com/users/${userId}/posts/4.png`,
+              `https://cdn.example.com/users/${userId}/posts/5.png`,
+            ],
+          },
+        },
+        headers: {
+          cookie: `accessToken=${token}`,
+        },
+      });
+
+      expectGraphqlError(result.body, 'POST_IMAGE_LIMIT_EXCEEDED');
+    });
+
+    it('subcontent에 비문자열을 전달하면 GraphQL 입력 검증 오류를 반환한다', async () => {
+      const { token } = await createUserAndLogin();
+
+      const result = await executeGraphql<CreatePostPayload>({
+        query: CREATE_POST_MUTATION,
+        variables: {
+          input: {
+            content: '본문',
+            subcontent: {
+              text: 'invalid',
+            },
+          },
+        },
+        headers: {
+          cookie: `accessToken=${token}`,
+        },
+      });
+
+      expect(result.body.data == null).toBe(true);
+      expect(result.body.errors).toBeDefined();
+      const code = result.body.errors?.[0]?.extensions?.code;
+      expect(['BAD_USER_INPUT', 'GRAPHQL_VALIDATION_FAILED']).toContain(code);
+    });
+  });
+
   describe('Access Control', () => {
+    it('비인증 createPost는 UNAUTHORIZED를 반환한다', async () => {
+      const result = await executeGraphql<CreatePostPayload>({
+        query: CREATE_POST_MUTATION,
+        variables: {
+          input: {
+            content: '비인증 작성 시도',
+          },
+        },
+      });
+
+      expectGraphqlError(result.body, 'UNAUTHORIZED');
+    });
+
     it('비인증 posts 조회는 UNAUTHORIZED를 반환한다', async () => {
       const result = await executeGraphql<PostsPayload>({
         query: POSTS_QUERY,
