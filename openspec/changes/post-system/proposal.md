@@ -8,7 +8,7 @@
 - **타임라인 피드**: 커서 기반 무한 스크롤 (Relay Cursor Connections, 인증 사용자 전용)
 - **단건 게시물 조회 공개**: `post(id)`는 비인증 사용자도 조회 가능
 - **이미지 업로드**: S3 호환 스토리지 (Cloudflare R2) + 클라이언트 압축
-- **태그 시스템**: 게시물에 태그 추가 (배열 필드)
+- **부가설명(subtitle)**: 본문 하단에 표시할 보조 텍스트 추가 (문자열 필드)
 - **카테고리**: 게시물 분류 (선택적)
 - **제약 조건**: 텍스트 최대 150자, 이미지 최대 4장 (개별 5MB 이하, 클라이언트 압축 1MB 이하 권장)
 
@@ -35,7 +35,7 @@
 **백엔드 (apps/api)**:
 
 - 새 bounded-context: `post`
-- Prisma 모델: `Post` (content, tags, category, imageUrls, authorId)
+- Prisma 모델: `Post` (content, subtitle, category, imageUrls, authorId)
 - GraphQL Schema: Query `posts`, `post`, Mutation `createPost`, `updatePost`, `deletePost`
 - S3 클라이언트: `@aws-sdk/client-s3`, `@aws-sdk/s3-request-presigner`
 - 환경 변수: `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY`, `S3_SECRET_KEY`
