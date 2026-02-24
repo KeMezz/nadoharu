@@ -1,5 +1,7 @@
 ## MODIFIED Requirements
 
+> Note: 본 delta는 main spec(`openspec/specs/web-auth-route-guard/spec.md`)의 `/posts` 보호 정책을 수정한다. 아카이브 단계에서 main spec 동기화(`/opsx:sync`)를 수행해야 한다.
+
 ### Requirement: 보호 라우트는 비인증 접근을 차단해야 한다
 
 시스템은 `/me` 및 후속 탭 영역 라우트를 보호 라우트로 처리해야 하며 비인증 접근을 차단해야 한다(MUST). 시스템은 `/posts`를 비인증 접근 허용 라우트로 처리하되 비인증 사용자에게 로그인 안내 UX를 표시해야 한다(MUST). 시스템은 `/posts/[id]`를 공개 라우트로 처리해야 하며 비인증 접근 시 로그인 리다이렉트를 수행하지 않아야 한다(MUST). 시스템은 작성/수정 라우트(`/posts/new`, `/posts/[id]/edit`)를 보호 라우트로 처리해야 하며 비인증 접근 시 `/login`으로 리다이렉트해야 한다(MUST).

@@ -35,6 +35,7 @@
 ### Modified Capabilities
 
 - `web-auth-route-guard`: `/posts` 접근 허용+안내, `/posts/new`·`/posts/[id]/edit` 보호, `/posts/[id]` 공개 라우트 정책으로 확장
+- 참고: 본 change는 main `web-auth-route-guard` 스펙의 `/posts` 보호 정책을 변경하는 delta이며, 아카이브 단계에서 main spec 동기화가 필요함
 
 ## Impact
 

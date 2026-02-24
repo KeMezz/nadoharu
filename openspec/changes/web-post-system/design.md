@@ -94,5 +94,5 @@
 - 현재 오픈 이슈 없음.
 - 확정 사항: 이미지 업로드 정책은 `packages/shared`를 단일 정책 소스로 두고 API가 최종 강제한다.
 - 확정 사항: `/posts` 타임라인 정렬은 최신순(`createdAt DESC`, `id DESC`) 고정으로 처리한다.
-- 확정 사항: 게시물 수정 권한 실패 UX는 상태 코드 기준으로 구분해 `401`/`403`을 표시한다.
+- 확정 사항: 게시물 수정 권한 실패 UX는 GraphQL `errors[].extensions.code` 기준으로 인증/인가 오류(`UNAUTHENTICATED`/`FORBIDDEN` 또는 401/403 의미 코드)를 구분한다.
 - 확정 사항: 카테고리는 이번 범위에서 UI 미노출 및 빈 값 고정으로 처리하고, content 패턴 기반 지정은 별도 change에서 다룬다.
