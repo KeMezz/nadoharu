@@ -97,6 +97,13 @@ describe('AuthResolver (Integration)', () => {
       JWT_SECRET:
         originalEnv.JWT_SECRET ?? 'jwt-secret-key-with-at-least-32-characters',
       JWT_EXPIRES_IN: originalEnv.JWT_EXPIRES_IN ?? '15m',
+      R2_ENDPOINT:
+        originalEnv.R2_ENDPOINT ?? 'https://example-r2.cloudflare.com',
+      R2_BUCKET_NAME: originalEnv.R2_BUCKET_NAME ?? 'nadoharu-post-images',
+      R2_ACCESS_KEY_ID: originalEnv.R2_ACCESS_KEY_ID ?? 'test-access-key',
+      R2_SECRET_ACCESS_KEY:
+        originalEnv.R2_SECRET_ACCESS_KEY ?? 'test-secret-key',
+      R2_PUBLIC_URL: originalEnv.R2_PUBLIC_URL ?? 'https://cdn.example.com',
     };
 
     module = await Test.createTestingModule({
@@ -123,7 +130,9 @@ describe('AuthResolver (Integration)', () => {
   });
 
   afterAll(async () => {
-    await app.close();
+    if (app) {
+      await app.close();
+    }
     process.env = originalEnv;
   });
 

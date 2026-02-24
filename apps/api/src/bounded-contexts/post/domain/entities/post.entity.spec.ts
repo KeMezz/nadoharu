@@ -111,4 +111,40 @@ describe('Post Entity', () => {
     expect(post.getContent()).toBe('');
     expect(post.getImageUrls()).toHaveLength(1);
   });
+
+  it('reconstitute는 저장된 데이터를 검증 없이 복원한다', () => {
+    expect(() =>
+      Post.reconstitute({
+        id: '00000000-0000-0000-0000-000000000001',
+        authorId,
+        content: 'a'.repeat(151),
+        subcontent: null,
+        category: null,
+        imageUrls: [],
+        createdAt: new Date('2026-02-01T00:00:00.000Z'),
+        updatedAt: new Date('2026-02-01T00:00:00.000Z'),
+        deletedAt: null,
+      }),
+    ).not.toThrow();
+  });
+
+  it('markDeleted는 updatedAt을 변경하지 않고 deletedAt만 설정한다', () => {
+    const updatedAt = new Date('2026-02-01T00:00:00.000Z');
+    const post = Post.reconstitute({
+      id: '00000000-0000-0000-0000-000000000001',
+      authorId,
+      content: '삭제 테스트',
+      subcontent: null,
+      category: null,
+      imageUrls: [],
+      createdAt: new Date('2026-02-01T00:00:00.000Z'),
+      updatedAt,
+      deletedAt: null,
+    });
+
+    const deleted = post.markDeleted();
+
+    expect(deleted.getUpdatedAt()).toEqual(updatedAt);
+    expect(deleted.getDeletedAt()).toBeInstanceOf(Date);
+  });
 });

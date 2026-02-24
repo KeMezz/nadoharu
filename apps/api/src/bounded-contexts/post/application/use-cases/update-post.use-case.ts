@@ -3,6 +3,10 @@ import {
   PostRepository,
   POST_REPOSITORY,
 } from '../ports/post.repository.interface';
+import {
+  PostImageUrlPolicy,
+  POST_IMAGE_URL_POLICY,
+} from '../ports/post-image-url-policy.interface';
 import { Post } from '../../domain/entities/post.entity';
 import { PostError, PostErrorCode } from '../../domain/errors/post.error';
 import { assertPostImageUrlsAllowed } from './validate-post-image-urls';
@@ -21,6 +25,8 @@ export class UpdatePostUseCase {
   constructor(
     @Inject(POST_REPOSITORY)
     private readonly postRepository: PostRepository,
+    @Inject(POST_IMAGE_URL_POLICY)
+    private readonly postImageUrlPolicy: PostImageUrlPolicy,
   ) {}
 
   async execute(input: UpdatePostInput): Promise<Post> {
@@ -58,7 +64,7 @@ export class UpdatePostUseCase {
     assertPostImageUrlsAllowed({
       imageUrls: nextImageUrls,
       userId: input.userId,
-      publicUrl: process.env.R2_PUBLIC_URL,
+      publicUrl: this.postImageUrlPolicy.getPublicUrl(),
     });
 
     const updated = post.update({

@@ -2,26 +2,30 @@ import { PostRepository } from '../ports/post.repository.interface';
 import { UpdatePostUseCase } from './update-post.use-case';
 import { Post } from '../../domain/entities/post.entity';
 import { PostErrorCode } from '../../domain/errors/post.error';
+import { PostImageUrlPolicy } from '../ports/post-image-url-policy.interface';
 
 describe('UpdatePostUseCase', () => {
   let useCase: UpdatePostUseCase;
   let repository: jest.Mocked<PostRepository>;
+  let imageUrlPolicy: jest.Mocked<PostImageUrlPolicy>;
 
   const authorId = '550e8400-e29b-41d4-a716-446655440000';
   const otherUserId = '550e8400-e29b-41d4-a716-446655440001';
 
   beforeEach(() => {
-    process.env.R2_PUBLIC_URL = 'https://cdn.example.com';
-
     repository = {
       save: jest.fn(),
       findById: jest.fn(),
       findTimeline: jest.fn(),
     } as jest.Mocked<PostRepository>;
 
+    imageUrlPolicy = {
+      getPublicUrl: jest.fn().mockReturnValue('https://cdn.example.com'),
+    };
+
     repository.save.mockImplementation(async (post: Post) => post);
 
-    useCase = new UpdatePostUseCase(repository);
+    useCase = new UpdatePostUseCase(repository, imageUrlPolicy);
   });
 
   afterEach(() => {
@@ -49,6 +53,7 @@ describe('UpdatePostUseCase', () => {
     expect(result.getImageUrls()).toEqual([
       'https://cdn.example.com/users/550e8400-e29b-41d4-a716-446655440000/posts/new.png',
     ]);
+    expect(imageUrlPolicy.getPublicUrl).toHaveBeenCalledTimes(1);
   });
 
   it('imageUrls를 생략하면 기존 이미지 목록을 유지한다', async () => {
@@ -105,7 +110,9 @@ describe('UpdatePostUseCase', () => {
   });
 
   it('R2_PUBLIC_URL에 base path가 있어도 동일 사용자 URL을 허용한다', async () => {
-    process.env.R2_PUBLIC_URL = 'https://cdn.example.com/media';
+    imageUrlPolicy.getPublicUrl.mockReturnValue(
+      'https://cdn.example.com/media',
+    );
 
     const post = buildPost({
       imageUrls: [

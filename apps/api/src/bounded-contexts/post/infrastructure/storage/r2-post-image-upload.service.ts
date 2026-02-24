@@ -20,38 +20,42 @@ interface R2Config {
 @Injectable()
 export class R2PostImageUploadService implements PostImageUploadService {
   private readonly expiresInSeconds = 300;
+  private readonly config: R2Config;
+  private readonly client: S3Client;
+
+  constructor() {
+    this.config = this.resolveConfig();
+    this.client = new S3Client({
+      endpoint: this.config.endpoint,
+      region: 'auto',
+      credentials: {
+        accessKeyId: this.config.accessKeyId,
+        secretAccessKey: this.config.secretAccessKey,
+      },
+    });
+  }
 
   async issueUploadUrl(
     input: IssuePostImageUploadUrlInput,
   ): Promise<IssuePostImageUploadUrlOutput> {
-    const config = this.resolveConfig();
     const extension = resolveFileExtension(input.contentType);
     const objectKey = `users/${input.userId}/posts/${randomUUID()}.${extension}`;
 
-    const client = new S3Client({
-      endpoint: config.endpoint,
-      region: 'auto',
-      credentials: {
-        accessKeyId: config.accessKeyId,
-        secretAccessKey: config.secretAccessKey,
-      },
-    });
-
     const command = new PutObjectCommand({
-      Bucket: config.bucketName,
+      Bucket: this.config.bucketName,
       Key: objectKey,
       ContentType: input.contentType,
       ContentLength: input.fileSize,
     });
 
-    const uploadUrl = await getSignedUrl(client, command, {
+    const uploadUrl = await getSignedUrl(this.client, command, {
       expiresIn: this.expiresInSeconds,
     });
 
     return {
       uploadUrl,
       objectKey,
-      imageUrl: `${config.publicUrl}/${objectKey}`,
+      imageUrl: `${this.config.publicUrl}/${objectKey}`,
       expiresInSeconds: this.expiresInSeconds,
     };
   }

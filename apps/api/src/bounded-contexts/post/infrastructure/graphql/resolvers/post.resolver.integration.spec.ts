@@ -76,6 +76,15 @@ interface PostsPayload {
   };
 }
 
+interface IssuePostImageUploadUrlPayload {
+  issuePostImageUploadUrl: {
+    uploadUrl: string;
+    imageUrl: string;
+    objectKey: string;
+    expiresInSeconds: number;
+  };
+}
+
 const CREATE_USER_MUTATION = `
   mutation CreateUser($input: CreateUserInput!) {
     createUser(input: $input) {
@@ -123,6 +132,17 @@ const DELETE_POST_MUTATION = `
   }
 `;
 
+const ISSUE_POST_IMAGE_UPLOAD_URL_MUTATION = `
+  mutation IssuePostImageUploadUrl($input: IssuePostImageUploadUrlInput!) {
+    issuePostImageUploadUrl(input: $input) {
+      uploadUrl
+      imageUrl
+      objectKey
+      expiresInSeconds
+    }
+  }
+`;
+
 const POST_QUERY = `
   query Post($id: String!) {
     post(id: $id) {
@@ -167,6 +187,12 @@ describe('PostResolver (Integration)', () => {
       JWT_SECRET:
         originalEnv.JWT_SECRET ?? 'jwt-secret-key-with-at-least-32-characters',
       JWT_EXPIRES_IN: originalEnv.JWT_EXPIRES_IN ?? '15m',
+      R2_ENDPOINT:
+        originalEnv.R2_ENDPOINT ?? 'https://example-r2.cloudflare.com',
+      R2_BUCKET_NAME: originalEnv.R2_BUCKET_NAME ?? 'nadoharu-post-images',
+      R2_ACCESS_KEY_ID: originalEnv.R2_ACCESS_KEY_ID ?? 'test-access-key',
+      R2_SECRET_ACCESS_KEY:
+        originalEnv.R2_SECRET_ACCESS_KEY ?? 'test-secret-key',
       R2_PUBLIC_URL: originalEnv.R2_PUBLIC_URL ?? 'https://cdn.example.com',
     };
 
@@ -194,7 +220,9 @@ describe('PostResolver (Integration)', () => {
   });
 
   afterAll(async () => {
-    await app.close();
+    if (app) {
+      await app.close();
+    }
     process.env = originalEnv;
   });
 
@@ -554,6 +582,20 @@ describe('PostResolver (Integration)', () => {
 
       expect(postResult.body.errors).toBeUndefined();
       expect(postResult.body.data?.post?.id).toBe(postId);
+    });
+
+    it('비인증 issuePostImageUploadUrl은 UNAUTHORIZED를 반환한다', async () => {
+      const result = await executeGraphql<IssuePostImageUploadUrlPayload>({
+        query: ISSUE_POST_IMAGE_UPLOAD_URL_MUTATION,
+        variables: {
+          input: {
+            contentType: 'image/png',
+            fileSize: 1024,
+          },
+        },
+      });
+
+      expectGraphqlError(result.body, 'UNAUTHORIZED');
     });
   });
 });

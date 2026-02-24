@@ -67,7 +67,7 @@ export class Post {
   }
 
   static reconstitute(props: ReconstitutePostProps): Post {
-    const normalized = Post.normalizeAndValidate({
+    const normalized = Post.normalize({
       content: props.content,
       subcontent: props.subcontent,
       category: props.category,
@@ -109,7 +109,6 @@ export class Post {
   }
 
   markDeleted(): Post {
-    const now = new Date();
     return new Post(
       this.id,
       this.content,
@@ -118,8 +117,8 @@ export class Post {
       this.imageUrls,
       this.authorId,
       this.createdAt,
-      now,
-      now,
+      this.updatedAt,
+      new Date(),
     );
   }
 
@@ -159,6 +158,25 @@ export class Post {
     return this.deletedAt;
   }
 
+  private static normalize(input: {
+    content: string;
+    subcontent?: string | null;
+    category?: string | null;
+    imageUrls: string[];
+  }): {
+    content: string;
+    subcontent: string | null;
+    category: string | null;
+    imageUrls: string[];
+  } {
+    return {
+      content: input.content.trim(),
+      subcontent: Post.normalizeOptionalString(input.subcontent),
+      category: Post.normalizeOptionalString(input.category),
+      imageUrls: [...input.imageUrls],
+    };
+  }
+
   private static normalizeAndValidate(input: {
     content: string;
     subcontent?: string | null;
@@ -170,10 +188,7 @@ export class Post {
     category: string | null;
     imageUrls: string[];
   } {
-    const content = input.content.trim();
-    const subcontent = Post.normalizeOptionalString(input.subcontent);
-    const category = Post.normalizeOptionalString(input.category);
-    const imageUrls = [...input.imageUrls];
+    const { content, subcontent, category, imageUrls } = Post.normalize(input);
 
     if (content.length > MAX_CONTENT_LENGTH) {
       throw new PostValidationError(
