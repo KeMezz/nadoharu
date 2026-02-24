@@ -15,6 +15,7 @@
 
 - `post-system` 완료
 - `nado-feature` 완료
+- `web-post-system` 완료
 
 **범위 제외**:
 

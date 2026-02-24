@@ -16,7 +16,7 @@
 
 ### Requirement: 게시물 수정은 작성자에게만 허용되어야 한다
 
-시스템은 GraphQL Mutation `updatePost`를 제공해야 하며(MUST), 대상 게시물의 작성자만 수정할 수 있어야 한다(MUST). 비작성자의 수정 시도는 권한 오류로 거부되어야 한다(MUST).
+시스템은 GraphQL Mutation `updatePost`를 제공해야 하며(MUST), 대상 게시물의 작성자만 수정할 수 있어야 한다(MUST). 비작성자의 수정 시도는 권한 오류로 거부되어야 한다(MUST). `imageUrls` 필드가 요청에 포함되면 기존 이미지 목록을 입력 목록으로 전체 교체해야 하며(MUST), `imageUrls`가 생략되면 기존 이미지 목록을 유지해야 한다(MUST).
 
 #### Scenario: 작성자의 게시물 수정 성공
 
@@ -27,6 +27,16 @@
 
 - **WHEN** 게시물 작성자가 아닌 사용자가 `updatePost`를 호출한다
 - **THEN** 시스템은 권한 오류를 반환하고 게시물을 변경하지 않는다
+
+#### Scenario: 수정 요청에 `imageUrls` 포함 시 전체 교체
+
+- **WHEN** 게시물 작성자가 `imageUrls`를 포함해 `updatePost`를 호출한다
+- **THEN** 시스템은 기존 이미지 목록을 입력된 목록으로 전체 교체한다
+
+#### Scenario: 수정 요청에 `imageUrls` 미포함 시 기존 유지
+
+- **WHEN** 게시물 작성자가 `imageUrls` 없이 `updatePost`를 호출한다
+- **THEN** 시스템은 기존 이미지 목록을 유지한다
 
 ### Requirement: 게시물 삭제는 `deletedAt` 기반 소프트 삭제로 처리되어야 한다
 
