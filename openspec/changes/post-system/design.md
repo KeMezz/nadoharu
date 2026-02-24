@@ -37,10 +37,10 @@
 
 ### 2) 데이터 모델은 단일 `Post` 엔티티 + 단순 필드 구조로 시작
 
-- **결정**: `Post`에 `content`, `subtitle(String?)`, `category(String?)`, `imageUrls(String[])`, `authorId`, `createdAt`, `updatedAt`를 둔다.
+- **결정**: `Post`에 `content`, `subcontent(String?)`, `category(String?)`, `imageUrls(String[])`, `authorId`, `createdAt`, `updatedAt`를 둔다. `content`와 `subcontent`의 길이 상한은 각각 150자로 동일하게 제한한다.
 - **대안 A**: 이미지를 별도 `PostImage` 테이블로 정규화.
 - **대안 B**: 부가설명/카테고리를 별도 메타데이터 테이블로 분리.
-- **채택 이유**: 현재 제약(이미지 최대 4장, subtitle 단일 문자열)에서는 단일 레코드 모델이 구현 복잡도를 크게 줄인다. 검색/통계 요구가 명확해질 때 정규화로 확장한다.
+- **채택 이유**: 현재 제약(이미지 최대 4장, subcontent 단일 문자열)에서는 단일 레코드 모델이 구현 복잡도를 크게 줄인다. 검색/통계 요구가 명확해질 때 정규화로 확장한다.
 
 ### 3) 업로드는 "presigned URL 발급"과 "게시물 저장"을 분리
 
