@@ -1,7 +1,7 @@
 ## 1. 라우트/콜로케이션 골격 및 GraphQL 문서 준비
 
 - [ ] 1.1 `app/posts`와 `app/posts/[id]`에 `_components` 기반 라우트 구조를 추가한다.
-- [ ] 1.2 타임라인/상세/작성/수정/업로드용 `*.query.ts`, `*.mutation.ts`, `*.graphql` 파일을 라우트 인접 위치에 생성한다.
+- [ ] 1.2 타임라인/상세/작성/수정/업로드용 `*.query.ts`, `*.mutation.ts`, `*.graphql` 파일을 라우트 인접 위치에 생성한다(수정 폼 `/posts/[id]/edit`용 기존 게시물 조회 `post(id)` 쿼리 포함).
 - [ ] 1.3 `pnpm --filter web graphql:generate`를 실행해 near-operation-file 생성 타입(`*.generated.ts`)을 반영한다.
 
 ## 2. 인증 경계와 라우트 정책 반영
@@ -25,10 +25,11 @@
 
 ## 5. 작성/수정 폼과 카테고리 임시 정책 반영
 
-- [ ] 5.1 (RED) 폼 검증/제출 상태 전이, 최소 콘텐츠(`content` trim 값 또는 `imageUrls` 1개 이상) 검증, 카테고리 UI 미노출, 카테고리 빈 값 고정 시나리오 테스트를 먼저 작성한다.
+- [ ] 5.1 (RED) 폼 검증/제출 상태 전이, 최소 콘텐츠(`content` trim 값 또는 `imageUrls` 1개 이상) 검증, `content`/`subcontent` 150자 사전 검증, 카테고리 UI 미노출, 카테고리 빈 값 고정 시나리오 테스트를 먼저 작성한다.
 - [ ] 5.2 `use<PostForm>Form` 훅으로 검증/제출/에러 매핑/리다이렉트 로직을 UI에서 분리한다.
 - [ ] 5.3 작성/수정 화면에서 카테고리 입력 컨트롤을 제거하고 제출 payload의 카테고리를 빈 값으로 고정한다.
 - [ ] 5.4 작성/수정 요청 실패 시 GraphQL `errors[].extensions.code` 기준 인증/인가 오류를 구분해 로그인 유도 또는 권한 없음 메시지를 표시한다.
+- [ ] 5.5 수정 폼 진입 시 기존 게시물 데이터를 프리필하고, 수정 제출 시 `imageUrls` 최종 목록 전체를 전달해 전체 교체 시맨틱을 보장한다.
 
 ## 6. presigned URL 이미지 업로드 흐름 구현
 
@@ -39,6 +40,6 @@
 
 ## 7. 테스트 및 최종 검증
 
-- [ ] 7.1 Vitest로 타임라인/상세/폼/업로드/권한 분기 테스트를 통과시킨다.
+- [ ] 7.1 Vitest로 타임라인/상세/폼/업로드/권한 분기/수정 폼 프리필·이미지 전체 목록 제출 테스트를 통과시킨다.
 - [ ] 7.2 Playwright로 비인증 `/posts` 안내, 비인증 `/posts/new`/`/posts/[id]/edit` 리다이렉트, 타임라인 추가 로드, 다음 페이지 실패 후 재시도, 비인증 `/posts/[id]` 조회 시나리오를 통과시킨다.
 - [ ] 7.3 `pnpm --filter web lint`와 `pnpm --filter web test`로 최종 회귀를 확인한다.
