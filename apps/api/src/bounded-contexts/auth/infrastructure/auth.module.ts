@@ -73,6 +73,6 @@ const jwtConfigProvider = {
       useExisting: JwtTokenService,
     },
   ],
-  exports: [JwtAuthGuard],
+  exports: [JwtAuthGuard, 'PrismaClient'],
 })
 export class AuthModule {}

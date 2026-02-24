@@ -34,6 +34,7 @@ describe('PrismaUserRepository (Integration)', () => {
 
   beforeEach(async () => {
     // 각 테스트 전 DB 클린업
+    await prisma.post.deleteMany({});
     await prisma.user.deleteMany({});
   });
 

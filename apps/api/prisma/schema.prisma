@@ -15,6 +15,26 @@ model User {
   passwordHash String
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  posts        Post[]
 
   @@map("users")
+}
+
+model Post {
+  id        String    @id @default(uuid())
+  content   String
+  subcontent String?
+  category  String?
+  imageUrls String[]  @default([])
+  authorId  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  author    User      @relation(fields: [authorId], references: [id], onDelete: Restrict)
+
+  @@index([authorId])
+  @@index([createdAt])
+  @@index([deletedAt])
+  @@index([createdAt, id])
+  @@map("posts")
 }

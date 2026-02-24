@@ -44,7 +44,7 @@
 
 ### 3) 업로드는 "presigned URL 발급"과 "게시물 저장"을 분리
 
-- **결정**: 업로드 URL 발급 전용 GraphQL 작업(예: 업로드 키/URL 발급)을 두고, 요청 메타데이터(`contentType`, `fileSize`)를 서버에서 사전 검증한다. presigned URL에는 5MB 상한(`Content-Length-Range`)을 포함하고, 객체 키는 `users/{userId}/posts/` prefix로 발급한다. `createPost`/`updatePost`는 업로드 완료된 `imageUrls`만 저장하며 URL prefix의 사용자 일치 여부를 재검증한다.
+- **결정**: 업로드 URL 발급 전용 GraphQL 작업(예: 업로드 키/URL 발급)을 두고, 요청 메타데이터(`contentType`, `fileSize`)를 서버에서 사전 검증한다. presigned URL 서명에는 요청 `fileSize`(Content-Length)를 반영해 업로드 단계의 불일치/초과를 차단하고, 객체 키는 `users/{userId}/posts/` prefix로 발급한다. `createPost`/`updatePost`는 업로드 완료된 `imageUrls`만 저장하며 URL prefix의 사용자 일치 여부를 재검증한다.
 - **대안 A**: GraphQL mutation에서 바이너리/멀티파트를 직접 수신.
 - **대안 B**: Base64 이미지 문자열을 mutation payload로 전달.
 - **채택 이유**: API 서버 대역폭과 메모리 부담을 줄이고, 스토리지 계층 책임을 분리할 수 있다. 클라이언트 재시도 및 병렬 업로드도 단순해진다.
@@ -94,7 +94,7 @@
 - **[소프트 삭제 데이터 누적으로 인한 성능 저하]** -> `deletedAt` 인덱스를 추가하고, 보존 기간 경과 데이터 배치 정리 정책을 운영 가이드로 분리한다.
 - **[단일 레코드 모델의 확장 한계]** -> 고급 검색/이미지 메타데이터 요구가 생기면 `PostImage` 및 메타데이터 분리 마이그레이션 계획을 준비한다.
 - **[커서 구현 오류 시 중복/누락]** -> `createdAt+id` 복합 조건을 테스트 케이스로 고정하고, 통합 테스트에 경계 시나리오(동일 timestamp)를 포함한다.
-- **[Presigned URL 오용]** -> URL 만료시간을 짧게 설정하고, 발급 단계(`fileSize`) + 스토리지 단계(`Content-Length-Range`) 이중 검증, 사용자별 키 prefix 강제, 저장 시 사용자 일치 재검증을 적용한다.
+- **[Presigned URL 오용]** -> URL 만료시간을 짧게 설정하고, 발급 단계(`fileSize`) + 스토리지 단계(서명된 `Content-Length`) 이중 검증, 사용자별 키 prefix 강제, 저장 시 사용자 일치 재검증을 적용한다.
 
 ## Migration Plan
 
@@ -108,4 +108,4 @@
 
 ## Open Questions
 
-- 현재 결정된 범위 내 오픈 이슈 없음.
+- 후속 대응 필요: `R2_PUBLIC_URL` 미설정 시 게시물 이미지 URL origin 검증을 강제할지(실패) 폴백 허용을 유지할지 정책 확정이 필요함. 추적 이슈: `#32`.

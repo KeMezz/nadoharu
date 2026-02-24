@@ -1,0 +1,24 @@
+export const PostErrorCode = {
+  POST_NOT_FOUND: 'POST_NOT_FOUND',
+  POST_FORBIDDEN: 'POST_FORBIDDEN',
+  UNSUPPORTED_PAGINATION_PARAM: 'UNSUPPORTED_PAGINATION_PARAM',
+  INVALID_PAGINATION_CURSOR: 'INVALID_PAGINATION_CURSOR',
+  POST_IMAGE_URL_NOT_ALLOWED: 'POST_IMAGE_URL_NOT_ALLOWED',
+  POST_UPLOAD_FILE_SIZE_REQUIRED: 'POST_UPLOAD_FILE_SIZE_REQUIRED',
+  POST_UPLOAD_FILE_SIZE_EXCEEDED: 'POST_UPLOAD_FILE_SIZE_EXCEEDED',
+  POST_UPLOAD_CONTENT_TYPE_NOT_ALLOWED: 'POST_UPLOAD_CONTENT_TYPE_NOT_ALLOWED',
+  POST_UPLOAD_NOT_CONFIGURED: 'POST_UPLOAD_NOT_CONFIGURED',
+} as const;
+
+export type PostErrorCodeValue =
+  (typeof PostErrorCode)[keyof typeof PostErrorCode];
+
+export class PostError extends Error {
+  constructor(
+    public readonly code: PostErrorCodeValue,
+    message: string,
+  ) {
+    super(message);
+    this.name = 'PostError';
+  }
+}
