@@ -52,9 +52,14 @@
 - **WHEN** 작성/수정 요청이 실패한다
 - **THEN** 시스템은 실패 메시지와 재시도 가능한 상태를 표시한다
 
-### Requirement: 게시물 수정 실패는 GraphQL 인증/인가 코드를 구분해 표시해야 한다
+### Requirement: 게시물 작성/수정 실패는 GraphQL 인증/인가 코드를 구분해 표시해야 한다
 
-시스템은 게시물 수정 요청 실패 시 GraphQL `errors[].extensions.code`를 기준으로 인증 실패와 권한 부족을 구분해 안내해야 한다(MUST). 인증 실패는 `UNAUTHENTICATED`(또는 401 의미 코드), 권한 부족은 `FORBIDDEN`(또는 403 의미 코드)로 해석해야 한다(MUST). 인증 실패 시 재인증 동작을, 권한 부족 시 권한 없음 안내를 제공해야 한다(MUST).
+시스템은 게시물 작성/수정 요청 실패 시 GraphQL `errors[].extensions.code`를 기준으로 인증 실패와 권한 부족을 구분해 안내해야 한다(MUST). 작성 요청의 인증 실패는 `UNAUTHENTICATED`(또는 401 의미 코드)로 해석해야 하며(MUST), 수정 요청의 인증 실패/권한 부족은 `UNAUTHENTICATED`/`FORBIDDEN`(또는 401/403 의미 코드)으로 해석해야 한다(MUST). 인증 실패 시 재인증 동작을, 권한 부족 시 권한 없음 안내를 제공해야 한다(MUST).
+
+#### Scenario: 작성 요청이 인증 오류 코드로 실패
+
+- **WHEN** 사용자가 게시물 작성을 시도했지만 GraphQL `errors[].extensions.code`가 `UNAUTHENTICATED`(또는 401 의미 코드)다
+- **THEN** 시스템은 로그인 필요 메시지와 로그인 이동 동작을 표시한다
 
 #### Scenario: 수정 요청이 인증 오류 코드로 실패
 

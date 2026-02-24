@@ -86,7 +86,7 @@
 2. 타임라인/상세 조회 GraphQL 문서와 실행 모듈을 구현하고 타입을 생성한다.
 3. 게시물 작성/수정 폼(카테고리 UI 제외)과 이미지 업로드 흐름을 연결한다.
 4. Vitest 단위 테스트(폼 상태 전이, 에러 매핑, 권한 분기)를 작성한다.
-5. Playwright E2E(비인증 `/posts` 안내, 비인증 `/posts/new`/`/posts/[id]/edit` 리다이렉트, 무한 스크롤, 공개 상세 조회)를 작성한다.
+5. Playwright E2E(비인증 `/posts` 안내, 비인증 `/posts/new`/`/posts/[id]/edit` 리다이렉트, 무한 스크롤, 다음 페이지 실패 후 재시도, 공개 상세 조회)를 작성한다.
 6. 점진 배포 시 문제가 발생하면 신규 라우트 노출을 비활성화하고 기존 화면으로 롤백한다.
 
 ## Open Questions
@@ -94,5 +94,5 @@
 - 현재 오픈 이슈 없음.
 - 확정 사항: 이미지 업로드 정책은 `packages/shared`를 단일 정책 소스로 두고 API가 최종 강제한다.
 - 확정 사항: `/posts` 타임라인 정렬은 최신순(`createdAt DESC`, `id DESC`) 고정으로 처리한다.
-- 확정 사항: 게시물 수정 권한 실패 UX는 GraphQL `errors[].extensions.code` 기준으로 인증/인가 오류(`UNAUTHENTICATED`/`FORBIDDEN` 또는 401/403 의미 코드)를 구분한다.
+- 확정 사항: 게시물 작성/수정 실패 UX는 GraphQL `errors[].extensions.code` 기준으로 인증/인가 오류(`UNAUTHENTICATED`/`FORBIDDEN` 또는 401/403 의미 코드)를 구분한다.
 - 확정 사항: 카테고리는 이번 범위에서 UI 미노출 및 빈 값 고정으로 처리하고, content 패턴 기반 지정은 별도 change에서 다룬다.
