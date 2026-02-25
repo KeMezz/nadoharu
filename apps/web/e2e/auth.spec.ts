@@ -4,10 +4,14 @@ test.describe('로그인 페이지', () => {
   test('로그인 폼을 렌더링한다', async ({ page }) => {
     await page.goto('/login');
 
-    await expect(page.getByRole('heading', { name: /나.*도.*하.*루/ })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: /나.*도.*하.*루/ }),
+    ).toBeVisible();
     await expect(page.getByLabel(/아이디/i)).toBeVisible();
     await expect(page.getByLabel(/비밀번호/i)).toBeVisible();
-    await expect(page.getByRole('button', { name: '로그인', exact: true })).toBeVisible();
+    await expect(
+      page.getByRole('button', { name: '로그인', exact: true }),
+    ).toBeVisible();
   });
 
   test('회원가입 링크가 존재한다', async ({ page }) => {
@@ -58,14 +62,26 @@ test.describe('회원가입 페이지', () => {
 });
 
 test.describe('라우트 가드 - 비인증 사용자', () => {
-  test('비인증 사용자가 /me에 접근하면 /login으로 리다이렉트된다', async ({ page }) => {
+  test('비인증 사용자가 /me에 접근하면 /login으로 리다이렉트된다', async ({
+    page,
+  }) => {
     await page.goto('/me');
 
     await expect(page).toHaveURL(/\/login/);
   });
 
-  test('비인증 사용자가 /posts에 접근하면 /login으로 리다이렉트된다', async ({ page }) => {
-    await page.goto('/posts');
+  test('비인증 사용자가 /posts/new에 접근하면 /login으로 리다이렉트된다', async ({
+    page,
+  }) => {
+    await page.goto('/posts/new');
+
+    await expect(page).toHaveURL(/\/login/);
+  });
+
+  test('비인증 사용자가 /posts/post-1/edit에 접근하면 /login으로 리다이렉트된다', async ({
+    page,
+  }) => {
+    await page.goto('/posts/post-1/edit');
 
     await expect(page).toHaveURL(/\/login/);
   });

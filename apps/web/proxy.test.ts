@@ -56,7 +56,7 @@ describe('proxy', () => {
     });
   });
 
-  describe('보호 라우트 (/me, /posts)', () => {
+  describe('보호 라우트 (/me, /posts/new, /posts/[id]/edit)', () => {
     it('비인증 사용자가 /me에 접근하면 /login으로 리다이렉트한다', () => {
       const request = createRequest('/me', false);
       const response = proxy(request);
@@ -67,14 +67,38 @@ describe('proxy', () => {
       );
     });
 
-    it('비인증 사용자가 /posts에 접근하면 /login으로 리다이렉트한다', () => {
-      const request = createRequest('/posts', false);
+    it('비인증 사용자가 /posts/new에 접근하면 /login으로 리다이렉트한다', () => {
+      const request = createRequest('/posts/new', false);
       const response = proxy(request);
 
       expect(response.status).toBe(307);
       expect(new URL(response.headers.get('location')!).pathname).toBe(
         '/login',
       );
+    });
+
+    it('비인증 사용자가 /posts/1/edit에 접근하면 /login으로 리다이렉트한다', () => {
+      const request = createRequest('/posts/1/edit', false);
+      const response = proxy(request);
+
+      expect(response.status).toBe(307);
+      expect(new URL(response.headers.get('location')!).pathname).toBe(
+        '/login',
+      );
+    });
+
+    it('비인증 사용자가 /posts에 접근하면 통과시킨다', () => {
+      const request = createRequest('/posts', false);
+      const response = proxy(request);
+
+      expect(response.headers.get('location')).toBeNull();
+    });
+
+    it('비인증 사용자가 /posts/1에 접근하면 통과시킨다', () => {
+      const request = createRequest('/posts/1', false);
+      const response = proxy(request);
+
+      expect(response.headers.get('location')).toBeNull();
     });
 
     it('프록시 헤더가 있어도 요청 URL origin으로 리다이렉트한다', () => {
@@ -99,6 +123,20 @@ describe('proxy', () => {
 
     it('인증 사용자가 /posts에 접근하면 통과시킨다', () => {
       const request = createRequest('/posts', true);
+      const response = proxy(request);
+
+      expect(response.headers.get('location')).toBeNull();
+    });
+
+    it('인증 사용자가 /posts/new에 접근하면 통과시킨다', () => {
+      const request = createRequest('/posts/new', true);
+      const response = proxy(request);
+
+      expect(response.headers.get('location')).toBeNull();
+    });
+
+    it('인증 사용자가 /posts/1/edit에 접근하면 통과시킨다', () => {
+      const request = createRequest('/posts/1/edit', true);
       const response = proxy(request);
 
       expect(response.headers.get('location')).toBeNull();

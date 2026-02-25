@@ -1,0 +1,21 @@
+query PostsTimeline($first: Int!, $after: String) {
+  posts(first: $first, after: $after) {
+    edges {
+      cursor
+      node {
+        id
+        content
+        subcontent
+        category
+        imageUrls
+        authorId
+        createdAt
+        updatedAt
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
+}
