@@ -5,18 +5,10 @@ import {
   POST_IMAGE_UPLOAD_SERVICE,
 } from '../ports/post-image-upload.service.interface';
 import { PostError, PostErrorCode } from '../../domain/errors/post.error';
-
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
-
-const ALLOWED_FORMATS = new Set([
-  'jpeg',
-  'jpg',
-  'png',
-  'webp',
-  'heic',
-  'heif',
-  'gif',
-]);
+import {
+  normalizePostImageContentType,
+  POST_IMAGE_UPLOAD_MAX_FILE_SIZE_BYTES,
+} from '@nadoharu/shared';
 
 export interface IssuePostImageUploadUrlUseCaseInput {
   userId: string;
@@ -41,14 +33,22 @@ export class IssuePostImageUploadUrlUseCase {
       );
     }
 
-    if (input.fileSize > MAX_FILE_SIZE) {
+    if (input.fileSize > POST_IMAGE_UPLOAD_MAX_FILE_SIZE_BYTES) {
       throw new PostError(
         PostErrorCode.POST_UPLOAD_FILE_SIZE_EXCEEDED,
         '파일 크기는 5MB를 초과할 수 없습니다.',
       );
     }
 
-    const normalizedContentType = normalizeContentType(input.contentType);
+    const normalizedContentType = normalizePostImageContentType(
+      input.contentType,
+    );
+    if (!normalizedContentType) {
+      throw new PostError(
+        PostErrorCode.POST_UPLOAD_CONTENT_TYPE_NOT_ALLOWED,
+        '허용되지 않은 이미지 포맷입니다.',
+      );
+    }
 
     return await this.postImageUploadService.issueUploadUrl({
       userId: input.userId,
@@ -56,37 +56,4 @@ export class IssuePostImageUploadUrlUseCase {
       fileSize: input.fileSize,
     });
   }
-}
-
-function normalizeContentType(contentType: string): string {
-  const normalized = contentType.trim().toLowerCase();
-  const mimeType = normalized.split(';')[0]?.trim() ?? '';
-
-  if (mimeType.includes('/')) {
-    const [majorType, subType] = mimeType.split('/', 2);
-    if (majorType !== 'image') {
-      throw new PostError(
-        PostErrorCode.POST_UPLOAD_CONTENT_TYPE_NOT_ALLOWED,
-        '허용되지 않은 이미지 포맷입니다.',
-      );
-    }
-
-    if (!ALLOWED_FORMATS.has(subType ?? '')) {
-      throw new PostError(
-        PostErrorCode.POST_UPLOAD_CONTENT_TYPE_NOT_ALLOWED,
-        '허용되지 않은 이미지 포맷입니다.',
-      );
-    }
-
-    return `image/${subType}`;
-  }
-
-  if (!ALLOWED_FORMATS.has(mimeType)) {
-    throw new PostError(
-      PostErrorCode.POST_UPLOAD_CONTENT_TYPE_NOT_ALLOWED,
-      '허용되지 않은 이미지 포맷입니다.',
-    );
-  }
-
-  return `image/${mimeType}`;
 }

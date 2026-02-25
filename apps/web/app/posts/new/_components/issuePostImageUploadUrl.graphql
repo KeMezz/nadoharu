@@ -1,0 +1,8 @@
+mutation IssuePostImageUploadUrl($input: IssuePostImageUploadUrlInput!) {
+  issuePostImageUploadUrl(input: $input) {
+    uploadUrl
+    imageUrl
+    objectKey
+    expiresInSeconds
+  }
+}

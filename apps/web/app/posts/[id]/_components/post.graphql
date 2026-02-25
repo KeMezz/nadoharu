@@ -1,0 +1,12 @@
+query PostDetail($id: String!) {
+  post(id: $id) {
+    id
+    content
+    subcontent
+    category
+    imageUrls
+    authorId
+    createdAt
+    updatedAt
+  }
+}

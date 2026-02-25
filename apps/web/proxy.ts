@@ -1,7 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 const PUBLIC_ONLY_ROUTES = ['/login', '/sign-up'];
-const PROTECTED_ROUTES = ['/me', '/posts'];
+const PROTECTED_ROOT_ROUTES = ['/me'];
+
+function isProtectedRoute(pathname: string): boolean {
+  if (PROTECTED_ROOT_ROUTES.some((route) => pathname.startsWith(route))) {
+    return true;
+  }
+
+  if (pathname === '/posts/new') {
+    return true;
+  }
+
+  return /^\/posts\/[^/]+\/edit$/.test(pathname);
+}
 
 function createRedirectUrl(request: NextRequest, pathname: string): URL {
   const url = request.nextUrl.clone();
@@ -21,7 +33,7 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (PROTECTED_ROUTES.some((route) => pathname.startsWith(route))) {
+  if (isProtectedRoute(pathname)) {
     if (!hasToken) {
       return NextResponse.redirect(createRedirectUrl(request, '/login'));
     }
